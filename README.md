@@ -1,4 +1,4 @@
-![react-charty logo](./logo/charty.svg =64x)
+![react-charty logo](./logo/charty.svg =64x64)
 
 # react-charty [![npm version](https://img.shields.io/npm/v/react-charty.svg?style=flat)](https://www.npmjs.com/package/react-charty)
 
