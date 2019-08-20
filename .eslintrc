@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "standard",
+    "standard-react"
+  ],
+  "env": {
+    "es6": true
+  },
+  "plugins": [
+    "react"
+  ],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    // allow specifying true explicitly for boolean props
+    "react/jsx-boolean-value": 0
+  }
+}
