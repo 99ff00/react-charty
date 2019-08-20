@@ -1,4 +1,4 @@
-![react-charty logo]<img src="./logo/charty.svg" width="64" height="64" />
+<img src="./logo/charty.svg" width="128" height="128" />
 
 # react-charty [![npm version](https://img.shields.io/npm/v/react-charty.svg?style=flat)](https://www.npmjs.com/package/react-charty)
 
