@@ -1,4 +1,4 @@
-![react-charty logo](https://raw.githubusercontent.com/react-charty/react-charty/master/logo/charty.svg)
+![react-charty logo](./logo/charty.svg)
 
 # react-charty [![npm version](https://img.shields.io/npm/v/react-charty.svg?style=flat)](https://www.npmjs.com/package/react-charty)
 
