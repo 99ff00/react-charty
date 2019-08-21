@@ -16,6 +16,7 @@ export default class Charty extends Component {
     showLegend: PropTypes.bool,
     showButtons: PropTypes.bool,
     showPreview: PropTypes.bool,
+    legendPosition: PropTypes.string,
     data: PropTypes.object
   }
 

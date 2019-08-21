@@ -37,7 +37,7 @@ var CHART = '<div id=|header>\
   SNAP_DURATION = 200,
   LEGEND_TIMER = 10000,
   AREA = { HEADER: 1, MAIN: 2, XAXIS: 3, PREVIEW: 4, BRUSH_CENTER: 5, BRUSH_LEFT: 6, BRUSH_RIGHT: 7 },
-  IS_MOBILE = !!window.orientation,
+  IS_MOBILE = window.orientation !== undefined,
   CHARTS = [],
   ONE_DAY = 86400000,
   SHARED_PROPS = ['globalStart', 'globalEnd', 'localStart', 'localEnd', 'vLineX', 'vLineY', 'legendIsVisible', 'isZoomed', 'isZooming'],
@@ -174,10 +174,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     STATE = {}, myIdx = CHARTS.length,
     currentTheme,
     UI = _UI || {
-      chart: { topPadding: 50, hPadding: 15, vPadding: 0, height: 400 },
+      chart: { topPadding: 50, hPadding: 15, height: 400 },
       pie: { textColor: '#fff', segmentShift: 5 },
       preview: { height: 46, vPadding: 1, radius: 8, lineWidth: 1, handleW: 9, handleTick: 10, minBrushSize: 10, hitSlop: 10 },
-      grid: { lineWidth: 1, legendShift: -30, markerRadius: 3, markerLineWidth: 4 },
+      grid: { lineWidth: 1, legendShift: -10, markerRadius: 3, markerLineWidth: 4 },
       xAxis: { textWidth: 80, height: 32, fadeTime: 250 },
       yAxis: { textCount: 5, fadeTime: 500 },
       main: { lineWidth: 2 }
@@ -328,7 +328,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       FLAGS[t] = type.indexOf(t) >= 0
     })
 
-    FLAGS.lineType = FLAGS.line || FLAGS.multi_yaxis
+    FLAGS.linear = FLAGS.line || FLAGS.multi_yaxis
     FLAGS.showLegend = chart.showLegend !== false
     FLAGS.showButtons = chart.showButtons !== false
     FLAGS.showPreview = chart.showPreview !== false
@@ -592,7 +592,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         if (v)
           yPos = yPos + (yPos - V.yPos[c]) * a
       }
-      val = '' + Math.floor(c == 0 ? localMin : _y)
+      val = '' + Math.floor(c === 0 ? localMin : _y)
 
       if (yPos > 15) {
         ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
@@ -909,14 +909,14 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     if (V.prevW !== ww || V.prevH !== wh) {
       if (!FLAGS.showPreview)
-        UI.preview.height = 0;
+        UI.preview.height = 0
       V.prevW = ww
       V.prevH = wh
       UI.box.measure()
       if (UI.box.h < UI.chart.height)
         V.prevH = 0
-      UI.main.height = UI.chart.height - UI.preview.height - UI.xAxis.height - UI.chart.vPadding
-      UI.main.y = UI.chart.vPadding
+      UI.main.height = UI.chart.height - UI.preview.height - UI.xAxis.height
+      UI.main.y = 0
       UI.main.width = UI.box.w
       UI.xAxis.y = UI.main.y + UI.main.height
       UI.preview.y = UI.chart.height - UI.preview.height
@@ -930,7 +930,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
   function renderGrid() {
     var showLegend = FLAGS.showLegend && !isNaN(V.vLineX)
-    showLegend && (!FLAGS.bar || FLAGS.percentage) && UI.canvas.line(V.vLineX, UI.chart.vPadding, V.vLineX, UI.main.height + UI.chart.vPadding, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
+    showLegend && (!FLAGS.bar || FLAGS.percentage) && UI.canvas.line(V.vLineX, FLAGS.percentage ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
     if (!V.zoomedChart)
       toggleLegend(showLegend || (FLAGS.percentage && V.isZoomed))
   }
@@ -1060,7 +1060,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function whereAmI(x, _y) {
-    var y = _y - UI.chart.topPadding - 10
+    var y = _y - UI.chart.topPadding
     if (y >= 0 && y < UI.main.y)
       return AREA.HEADER
     else if (y >= UI.main.y && y < UI.xAxis.y)
@@ -1120,7 +1120,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       var y, p, x = V.localStart + (V.vLineX - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
         idx = zoomedPie ? V.selectedIndex : applyRange(Math.round((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1),
         scaleX = UI.preview.width / (V.localEnd - V.localStart),
-        dy = FLAGS.lineType ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
+        dy = FLAGS.linear ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
         scaleY = (UI.main.height - dy) / A.localDY, side = 1, sum = 0
 
       UI.xval.innerText = V.isZoomed ? unixToTime(AX[idx]) : unixToD(AX[idx], true)
@@ -1169,7 +1169,9 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       } else {
         side = V.vLineX < UI.main.width / 2 ? 0 : 1
         x = applyRange(V.vLineX - UI.grid.legendShift - side * (UI.legend.w - 2 * UI.grid.legendShift), 2, UI.main.width - UI.legend.w - 2)
-        y = applyRange(V.vLineY + 2 * UI.grid.legendShift - UI.legend.h - (IS_MOBILE ? 40 : 0), UI.chart.topPadding, UI.main.height - UI.legend.h)
+        if (chart.legendPosition === 'top') y = UI.chart.topPadding
+        else if (chart.legendPosition === 'bottom') y = UI.xAxis.y - UI.legend.h + 40
+        else y = applyRange(V.vLineY - UI.legend.h - (IS_MOBILE ? 50 : 10), UI.chart.topPadding, UI.xAxis.y - UI.legend.h + 20)
       }
       UI.legend.stylo({ opacity: 1, transform: 'translate3d(' + x + 'px, ' + y + 'px, 0)' }, true)
 
@@ -1552,7 +1554,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       if (V.isZoomed && FLAGS.percentage) {
         if (area === AREA.MAIN) {
           V.pieX = x - UI.main.width / 2
-          V.pieY = y - UI.main.height / 2 - UI.chart.topPadding - 10
+          V.pieY = y - UI.main.height / 2 - UI.chart.topPadding
         }
       }
 
