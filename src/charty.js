@@ -1147,8 +1147,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
           pp += p
           UI['labelPercent' + i].stylo({ display: zoomedPie ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
-        if (!FLAGS.bar && !FLAGS.percentage) {
-          if ((!_parent && !V.isZoomed) || (_parent && V.isZoomed))
+        if (!(FLAGS.bar || FLAGS.percentage)) {
+          if (_parent ^ V.isZoomed)
             ctx.strokeStyle = S.color
           ctx.beginPath()
           ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (FLAGS.multi_yaxis ? i : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
