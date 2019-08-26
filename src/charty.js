@@ -681,6 +681,199 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
   }
 
+  function renderPercentage(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview) {
+    var scaleX = width / (vEnd - vStart),
+      startIdx = X.toIndex(vStart - hPadding / scaleX, true),
+      endIdx = X.toIndex(vEnd + hPadding / scaleX),
+      scaleY, alpha, STACK = new Array(AXL),
+      max = 0, progress = isPreview ? 0 : V.progress,
+      p = Math.min(1, progress),
+      _p = (1 - progress)
+
+    if (p > 0 && !isPreview) {
+      vStart = V._localStart
+      vEnd = V._localEnd
+      scaleX = width / (vEnd - vStart)
+      startIdx = X.toIndex(vStart - hPadding / scaleX, true)
+      endIdx = X.toIndex(vEnd + hPadding / scaleX)
+    }
+
+    if (!isPreview)
+      height -= 12
+
+    var R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
+      TOTAL_MAX = MAX[type]
+
+    if (!TOTAL_MAX) {
+      TOTAL_MAX = new Array(AXL)
+      MAX[type] = TOTAL_MAX
+      for (var s = 0; s < AYL; s++)
+        for (var i = startIdx; i <= endIdx; i++)
+          TOTAL_MAX[i] = (TOTAL_MAX[i] || 0) + AY[s].data[i] * A['on' + s]
+    }
+
+    var _height = height / (1 + progress),
+      scaleY = _height / 100, angle = 0,
+      max = TOTAL_MAX[V.selectedIndex] || 1,
+      filled = false,
+      segment
+
+    if (!isPreview) {
+      offsetX -= UI.main.width / 2
+      offsetY -= R
+
+      ctx.save()
+      if (p < 1)
+        UI.canvas.rect(p * (UI.main.width / 2 - R), 10 * p, 2 * R * p + (1 - p) * (UI.main.width - hPadding), 2 * R + 20 * _p, p * R, true, true, true)
+
+      ctx.translate(UI.main.width / 2, UI.main.height / 2)
+      if (!isPreview && p < 1)
+        ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
+
+      if (p > .7) {
+        angle = 90 * PI_RAD
+        if (!isNaN(V.pieX)) {
+          var sectorR = Math.sqrt(V.pieX * V.pieX + V.pieY * V.pieY),
+            sectorA = Math.atan2(V.pieY, V.pieX)
+
+          sectorA -= 90 * PI_RAD
+          if (sectorA < 0)
+            sectorA += 2 * Math.PI
+        }
+        for (var s = AYL - 1; s >= 0; s--) {
+          var S = AY[s],
+            data = S.data,
+            alpha = A['on' + s],
+            selectedVal = data[V.selectedIndex] || 0,
+            percent = selectedVal / max,
+            z = A['pieZoom' + s] || 0,
+            a = (360 * progress * percent * alpha) * PI_RAD,
+            d = 0,
+            startA = angle - 90 * PI_RAD,
+            dx = z * (UI.pie.segmentShift + R * _p) * Math.cos(90 * PI_RAD + startA + a / 2),
+            dy = z * (UI.pie.segmentShift + R * _p) * Math.sin(90 * PI_RAD + startA + a / 2),
+            dr = z * UI.pie.segmentShift,
+            segment
+
+          if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
+            segment = s
+
+          S.angle = angle + a / 2
+          S.percent = alpha * percent
+          S.alpha = alpha
+          S.dx = dx
+          S.dy = dy
+          S.z = z
+          ctx.globalAlpha = masterA
+          ctx.fillStyle = S.barColor
+          ctx.beginPath()
+          ctx.moveTo(dx, dy)
+          if (V.seriesCount == 1 && !S.off) {
+            ctx.arc(0, 0, R + dr, angle, angle + 360 * PI_RAD)
+            ctx.fill()
+            break
+          } else {
+            d = dr / (360 - 180 * percent)
+            ctx.arc(dx, dy, R + dr, angle + d, angle + a + PI_RAD * alpha - d)
+          }
+          angle += a
+          ctx.fill()
+        }
+
+        if (!isNaN(segment)) {
+          if (V.segment !== segment) {
+            animate('pieZoom' + segment, 0, 1, ON_OFF_DURATION)
+            if (!isNaN(V.segment)) {
+              animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
+            }
+            V.segment = segment
+          }
+        } else if (!isNaN(V.segment)) {
+          animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
+          V.segment = undefined
+        }
+      }
+    }
+
+    if (p < 1 || isPreview) {
+      angle = 0
+
+      for (var s = AYL - 1; s >= 0; s--) {
+        var S = AY[s],
+          selectedVal = S.data[V.selectedIndex] || 0,
+          percent = selectedVal / max,
+          sector = 180 * percent,
+          centered = false,
+          alpha = A['on' + s],
+          a = 0
+
+        if (!isPreview) {
+          a = 180 * progress * percent * alpha * PI_RAD
+          ctx.rotate(angle + a)
+        }
+
+        UI.canvas.startLine(alpha, 0, S.barColor, ctx.lineWidth)
+
+        for (var i = startIdx, val, x, y, _x = 0, startX, stack, dy; i <= endIdx; i++) {
+          stack = STACK[i] || 0
+          val = 100 * S.data[i] / TOTAL_MAX[i] * alpha
+          x = offsetX + hPadding + (AX[i] - vStart) * scaleX
+          y = offsetY - _height + _p * stack * scaleY
+          dy = isPreview ? 0 : Math.abs(x) / Math.tan((90 * _p + progress * sector) * PI_RAD)
+          if (i === startIdx) {
+            startX = x
+            ctx.moveTo(x, _p * y + dy)
+          } else {
+            if (!centered && x >= 0 && progress > 0.5) {
+              centered = true
+              ctx.lineTo(x * _p, _p * (_p * y + dy))
+            } else
+              ctx.lineTo(x, _p * y + dy)
+          }
+          if (i === endIdx) {
+            if (!S.off && !filled) {
+              filled = true
+              ctx.globalAlpha = masterA
+              ctx.fillStyle = S.barColor
+              ctx.fillRect(startX, -offsetY + 26, x - startX, 2 * offsetY)
+              if (V.seriesCount == 1)
+                break
+            } else {
+              ctx.lineTo(x, 2 * offsetY)
+              ctx.lineTo(startX, 2 * offsetY)
+            }
+          }
+          STACK[i] = stack + val
+        }
+        ctx.fill()
+        if (!isPreview) {
+          ctx.rotate(-angle - a)
+          angle += 2 * a
+        }
+        if (V.seriesCount == 1 && !S.off)
+          break
+      }
+    }
+    if (!isPreview) {
+      ctx.restore()
+      if (p > 0.7) {
+        angle = 90 * PI_RAD
+        for (var s = AYL - 1, tp = 0; s >= 0; s--) {
+          var S = AY[s], r = R / 1.25,
+            text = Math.round((s == 0 ? 1 - tp : S.percent) * 100) + '%'
+          ctx.font = 14 + S.percent * 30 + 'px ' + FONT
+          var ts = ctx.measureText(text)
+          tp += S.percent
+          if (S.off)
+            continue
+          ctx.globalAlpha = p * S.alpha * masterA
+          ctx.fillStyle = UI.pie.textColor
+          ctx.fillText(text, UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx, UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + 2 + 2 * S.dy)
+        }
+      }
+    }
+  }
+
   function renderSeries(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview) {
     var scaleX = width / (vEnd - vStart),
       startIdx = X.toIndex(vStart - hPadding / scaleX, true),
@@ -691,196 +884,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     ctx.globalAlpha = masterA
     if (FLAGS.stacked || FLAGS.bar || FLAGS.percentage) {
-      var STACK = new Array(AXL),
-        barWidth = (UI.main.width) / (endIdx - startIdx) + 1 / DPR,
-        max = 0, progress = isPreview ? 0 : V.progress,
-        p = Math.min(1, progress),
-        _p = (1 - progress)
-
       if (FLAGS.percentage) {
-        if (p > 0 && !isPreview) {
-          vStart = V._localStart
-          vEnd = V._localEnd
-          scaleX = width / (vEnd - vStart)
-          startIdx = X.toIndex(vStart - hPadding / scaleX, true)
-          endIdx = X.toIndex(vEnd + hPadding / scaleX)
-        }
-
-        if (!isPreview)
-          height -= 12
-
-        var R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
-          TOTAL_MAX = MAX[type]
-
-        if (!TOTAL_MAX) {
-          TOTAL_MAX = new Array(AXL)
-          MAX[type] = TOTAL_MAX
-          for (var s = 0; s < AYL; s++)
-            for (var i = startIdx; i <= endIdx; i++)
-              TOTAL_MAX[i] = (TOTAL_MAX[i] || 0) + AY[s].data[i] * A['on' + s]
-        }
-
-        var _height = height / (1 + progress),
-          scaleY = _height / 100, angle = 0,
-          max = TOTAL_MAX[V.selectedIndex] || 1,
-          filled = false,
-          segment
-
-        if (!isPreview) {
-          offsetX -= UI.main.width / 2
-          offsetY -= R
-
-          ctx.save()
-          if (p < 1)
-            UI.canvas.rect(p * (UI.main.width / 2 - R), 10 * p, 2 * R * p + (1 - p) * (UI.main.width - hPadding), 2 * R + 20 * _p, p * R, true, true, true)
-
-          ctx.translate(UI.main.width / 2, UI.main.height / 2)
-          if (!isPreview && p < 1)
-            ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
-
-          if (p > .7) {
-            angle = 90 * PI_RAD
-            if (!isNaN(V.pieX)) {
-              var sectorR = Math.sqrt(V.pieX * V.pieX + V.pieY * V.pieY),
-                sectorA = Math.atan2(V.pieY, V.pieX)
-
-              sectorA -= 90 * PI_RAD
-              if (sectorA < 0)
-                sectorA += 2 * Math.PI
-            }
-            for (var s = AYL - 1; s >= 0; s--) {
-              var S = AY[s],
-                data = S.data,
-                alpha = A['on' + s],
-                selectedVal = data[V.selectedIndex] || 0,
-                percent = selectedVal / max,
-                z = A['pieZoom' + s] || 0,
-                a = (360 * progress * percent * alpha) * PI_RAD,
-                d = 0,
-                startA = angle - 90 * PI_RAD,
-                dx = z * (UI.pie.segmentShift + R * _p) * Math.cos(90 * PI_RAD + startA + a / 2),
-                dy = z * (UI.pie.segmentShift + R * _p) * Math.sin(90 * PI_RAD + startA + a / 2),
-                dr = z * UI.pie.segmentShift,
-                segment
-
-              if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
-                segment = s
-
-              S.angle = angle + a / 2
-              S.percent = alpha * percent
-              S.alpha = alpha
-              S.dx = dx
-              S.dy = dy
-              S.z = z
-              ctx.globalAlpha = masterA
-              ctx.fillStyle = S.barColor
-              ctx.beginPath()
-              ctx.moveTo(dx, dy)
-              if (V.seriesCount == 1 && !S.off) {
-                ctx.arc(0, 0, R + dr, angle, angle + 360 * PI_RAD)
-                ctx.fill()
-                break
-              } else {
-                d = dr / (360 - 180 * percent)
-                ctx.arc(dx, dy, R + dr, angle + d, angle + a + PI_RAD * alpha - d)
-              }
-              angle += a
-              ctx.fill()
-            }
-
-            if (!isNaN(segment)) {
-              if (V.segment !== segment) {
-                animate('pieZoom' + segment, 0, 1, ON_OFF_DURATION)
-                if (!isNaN(V.segment)) {
-                  animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
-                }
-                V.segment = segment
-              }
-            } else if (!isNaN(V.segment)) {
-              animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
-              V.segment = undefined
-            }
-          }
-        }
-
-        if (p < 1 || isPreview) {
-          angle = 0
-
-          for (var s = AYL - 1; s >= 0; s--) {
-            var S = AY[s],
-              selectedVal = S.data[V.selectedIndex] || 0,
-              percent = selectedVal / max,
-              sector = 180 * percent,
-              centered = false,
-              alpha = A['on' + s],
-              a = 0
-
-            if (!isPreview) {
-              a = 180 * progress * percent * alpha * PI_RAD
-              ctx.rotate(angle + a)
-            }
-
-            UI.canvas.startLine(alpha, 0, S.barColor, ctx.lineWidth)
-
-            for (var i = startIdx, val, x, y, _x = 0, startX, stack, dy; i <= endIdx; i++) {
-              stack = STACK[i] || 0
-              val = 100 * S.data[i] / TOTAL_MAX[i] * alpha
-              x = offsetX + hPadding + (AX[i] - vStart) * scaleX
-              y = offsetY - _height + _p * stack * scaleY
-              dy = isPreview ? 0 : Math.abs(x) / Math.tan((90 * _p + progress * sector) * PI_RAD)
-              if (i === startIdx) {
-                startX = x
-                ctx.moveTo(x, _p * y + dy)
-              } else {
-                if (!centered && x >= 0 && progress > 0.5) {
-                  centered = true
-                  ctx.lineTo(x * _p, _p * (_p * y + dy))
-                } else
-                  ctx.lineTo(x, _p * y + dy)
-              }
-              if (i === endIdx) {
-                if (!S.off && !filled) {
-                  filled = true
-                  ctx.globalAlpha = masterA
-                  ctx.fillStyle = S.barColor
-                  ctx.fillRect(startX, -offsetY + 26, x - startX, 2 * offsetY)
-                  if (V.seriesCount == 1)
-                    break
-                } else {
-                  ctx.lineTo(x, 2 * offsetY)
-                  ctx.lineTo(startX, 2 * offsetY)
-                }
-              }
-              STACK[i] = stack + val
-            }
-            ctx.fill()
-            if (!isPreview) {
-              ctx.rotate(-angle - a)
-              angle += 2 * a
-            }
-            if (V.seriesCount == 1 && !S.off)
-              break
-          }
-        }
-        if (!isPreview) {
-          ctx.restore()
-          if (p > 0.7) {
-            angle = 90 * PI_RAD
-            for (var s = AYL - 1, tp = 0; s >= 0; s--) {
-              var S = AY[s], r = R / 1.25,
-                text = Math.round((s == 0 ? 1 - tp : S.percent) * 100) + '%'
-              ctx.font = 14 + S.percent * 30 + 'px ' + FONT
-              var ts = ctx.measureText(text)
-              tp += S.percent
-              if (S.off)
-                continue
-              ctx.globalAlpha = p * S.alpha * masterA
-              ctx.fillStyle = UI.pie.textColor
-              ctx.fillText(text, UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx, UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + 2 + 2 * S.dy)
-            }
-          }
-
-        }
+        renderPercentage(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview)
       } else {
         renderBars(type, masterA, width, height, vStart, hPadding, offsetY, offsetX, isPreview, startIdx, endIdx, scaleX)
       }
@@ -1148,7 +1153,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
           UI['labelPercent' + i].stylo({ display: zoomedPie ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
         if (!(FLAGS.bar || FLAGS.percentage)) {
-          if (_parent ^ V.isZoomed)
+          if (!(_parent ^ V.isZoomed))
             ctx.strokeStyle = S.color
           ctx.beginPath()
           ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (FLAGS.multi_yaxis ? i : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
