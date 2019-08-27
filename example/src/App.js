@@ -24,7 +24,7 @@ const LIGHT_THEME = {
   },
   IS_MOBILE = window.orientation !== undefined,
   USA_CARS_DATA = {
-    type: 'percentage_area',
+    type: 'pie',
     data: {
       x: [2012, 2013, 2014, 2015, 2016, 2017, 2018],
       y0: [6608567, 6733192, 6643030, 7485587, 7793066, 6856880, 6422120],
