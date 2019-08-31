@@ -23,7 +23,7 @@ const LIGHT_THEME = {
     zoomedRange: { color: '#fff' }
   },
   IS_MOBILE = window.orientation !== undefined,
-  BOX_OFFICE = {
+  BOX_OFFICE_DATA = {
     type: 'pie',
     data: {
       x: [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
@@ -63,14 +63,14 @@ const LIGHT_THEME = {
       y2: '#F26B38',
       y3: '#F7DB4F',
       y4: '#2F9599',
-      y5: '#E1F5C4',
-      y6: '#FC913A',
+      y5: '#474747',
+      y6: '#FC9D9A',
       y7: '#FF4E50',
       y8: '#547980',
       y9: '#594F4F',
-      y10: '#FC9D9A',
+      y10: '#FC913A',
       y11: '#C8C8A9',
-      y12: '#474747'
+      y12: '#E1F5C4'
     }
   };
 
@@ -111,18 +111,19 @@ export default class App extends Component {
 
     const width = IS_MOBILE ? '100%' : '50%',
       theme = this.state.theme,
-      data = this.state.data;
+      data = this.state.data,
+      style = { width, paddingTop: 20 }
 
     return (
       <React.Fragment>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
-        <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
-          <Charty title="Followers" theme={theme} style={{ width }} {...data[0]} />
-          <Charty title="Interactions" theme={theme} style={{ width }} {...data[1]} />
-          <Charty title="Messages" theme={theme} style={{ width }} {...data[2]} />
-          <Charty title="Views" theme={theme} style={{ width }} {...data[3]} />
-          <Charty title="Fruits" theme={theme} style={{ width }} {...data[4]} />
-          <Charty title="Box Office Ticket Sales By Year" theme={theme} style={{ width, paddingBottom: 50 }} {...BOX_OFFICE} />
+        <div className="container">
+          {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} />
+          <Charty title="Interactions" theme={theme} style={style} {...data[1]} />
+          <Charty title="Messages" theme={theme} style={style} {...data[2]} />
+          <Charty title="Views" theme={theme} style={style} {...data[3]} />
+          <Charty title="Fruits" theme={theme} style={style} {...data[4]} /> */}
+          <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} />
         </div>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>

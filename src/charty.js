@@ -166,7 +166,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   var ID = typeof _ID === 'object' ? _ID.id : _ID
 
   if (!ID)
-    ID = _ID.id = 'graph-' + CHARTS.length
+    ID = _ID.id = 'charty-' + CHARTS.length
 
   var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = _ctx,
     IDs = [ID], AY = [], AYL, AX, AXL, X = {}, TYPES = {},
@@ -488,6 +488,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function renderAxis() {
+    if (TYPES.pie) return
+
     var localD, localMin, localMax = 0, minLocalD, lowerMin,
       p = Math.min(1, V.progress)
 
@@ -521,8 +523,9 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       y = UI.xAxis.y + UI.xAxis.height / 2, minStep,
       stepX = Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
       stepY = Math.round(localD / UI.yAxis.textCount) || 1,
-      d = 5 * Math.pow(10, (stepY.toString().length - 2)) || 1,
-      stepY = Math.max(1, Math.round(stepY / d) * d)
+      d = 5 * Math.pow(10, (stepY.toString().length - 2)) || 1
+
+    stepY = Math.max(1, Math.round(stepY / d) * d)
 
     if (V.stepX !== stepX) {
       if (V.stepX) {
@@ -544,7 +547,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     if (V.stepY !== stepY) {
       if (V.stepY) {
-        animate('stepYA' + V.stepY, 1, 0, UI.yAxis.fadeTime / 2, 0, 0, function () { V.prevStepY = 0, V.yPos = [] })
+        animate('stepYA' + V.stepY, 1, 0, UI.yAxis.fadeTime / 2, 0, 0, function () {
+          V.prevStepY = 0
+          V.yPos = []
+        })
         V.prevStepY = V.stepY
       }
       animate('stepYA' + stepY, 0, 1, UI.yAxis.fadeTime)
@@ -579,12 +585,12 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function renderYText(prevStep, stepY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, p) {
-    var y = localMin, _y, yPos, val, c = 0, a0 = TYPES.multi_yaxis ? A['alphaY0'] : 1,
+    var y = localMin, y_, yPos, val, c = 0, a0 = TYPES.multi_yaxis ? A['alphaY0'] : 1,
       a1 = TYPES.multi_yaxis ? A['alphaY1'] : 1,
       a = A['stepYA' + stepY], v
 
     while (y < localMax) {
-      _y = (c == 0) && stepY > 10 ? Math.ceil(y / 10) * 10 : y
+      y_ = (c === 0) && stepY > 10 ? Math.ceil(y / 10) * 10 : y
 
       yPos = UI.xAxis.y - (y - localMin) * scaleY
       if (prevStep && c > 0) {
@@ -592,7 +598,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         if (v)
           yPos = yPos + (yPos - V.yPos[c]) * a
       }
-      val = '' + Math.floor(c === 0 ? localMin : _y)
+      val = '' + Math.floor(c === 0 ? localMin : y_)
 
       if (yPos > 15) {
         ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
@@ -611,8 +617,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       if (!prevStep)
         V.yPos[c] = yPos
       if (c === 0 && stepY > 10) {
-        _y = _y + (stepY - _y % stepY)
-        y = _y - y < stepY * .6 ? _y + stepY : _y
+        y_ = y_ + (stepY - y_ % stepY)
+        y = y_ - y < stepY * .6 ? y_ + stepY : y_
       } else
         y += stepY
       c++
@@ -878,21 +884,15 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     var scaleX = width / (vEnd - vStart),
       startIdx = X.toIndex(vStart - hPadding / scaleX, true),
       endIdx = X.toIndex(vEnd + hPadding / scaleX),
-      scaleY, alpha, STACK = new Array(AXL),
-      max = 0, progress = isPreview ? 0 : V.progress,
-      p = Math.min(1, progress),
-      _p = (1 - progress)
+      alpha
 
-    if (p > 0 && !isPreview) {
-      vStart = V._localStart
-      vEnd = V._localEnd
-      scaleX = width / (vEnd - vStart)
-      startIdx = X.toIndex(vStart - hPadding / scaleX, true)
-      endIdx = X.toIndex(vEnd + hPadding / scaleX)
-    }
+    vStart = V._localStart
+    vEnd = V._localEnd
+    scaleX = width / (vEnd - vStart)
+    startIdx = X.toIndex(vStart - hPadding / scaleX, true)
+    endIdx = X.toIndex(vEnd + hPadding / scaleX)
 
-    if (!isPreview)
-      height -= 12
+    height -= 12
 
     var R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
       TOTAL_MAX = MAX[type]
@@ -905,165 +905,92 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
           TOTAL_MAX[i] = (TOTAL_MAX[i] || 0) + AY[s].data[i] * A['on' + s]
     }
 
-    var _height = height / (1 + progress),
-      scaleY = _height / 100, angle = 0,
+    var angle = 0,
       max = TOTAL_MAX[V.selectedIndex] || 1,
-      filled = false,
       segment
 
-    if (!isPreview) {
-      offsetX -= UI.main.width / 2
-      offsetY -= R
+    offsetX -= UI.main.width / 2
+    offsetY -= R
 
-      ctx.save()
-      if (p < 1)
-        UI.canvas.rect(p * (UI.main.width / 2 - R), 10 * p, 2 * R * p + (1 - p) * (UI.main.width - hPadding), 2 * R + 20 * _p, p * R, true, true, true)
+    ctx.save()
 
-      ctx.translate(UI.main.width / 2, UI.main.height / 2)
-      if (!isPreview && p < 1)
-        ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
+    ctx.translate(UI.main.width / 2, UI.main.height / 2)
 
-      if (p > .7) {
-        angle = 90 * PI_RAD
-        if (!isNaN(V.pieX)) {
-          var sectorR = Math.sqrt(V.pieX * V.pieX + V.pieY * V.pieY),
-            sectorA = Math.atan2(V.pieY, V.pieX)
+    angle = 90 * PI_RAD
+    if (!isNaN(V.pieX)) {
+      var sectorR = Math.sqrt(V.pieX * V.pieX + V.pieY * V.pieY),
+        sectorA = Math.atan2(V.pieY, V.pieX)
 
-          sectorA -= 90 * PI_RAD
-          if (sectorA < 0)
-            sectorA += 2 * Math.PI
-        }
-        for (var s = AYL - 1; s >= 0; s--) {
-          var S = AY[s],
-            data = S.data,
-            alpha = A['on' + s],
-            selectedVal = data[V.selectedIndex] || 0,
-            percent = selectedVal / max,
-            z = A['pieZoom' + s] || 0,
-            a = (360 * progress * percent * alpha) * PI_RAD,
-            d = 0,
-            startA = angle - 90 * PI_RAD,
-            dx = z * (UI.pie.segmentShift + R * _p) * Math.cos(90 * PI_RAD + startA + a / 2),
-            dy = z * (UI.pie.segmentShift + R * _p) * Math.sin(90 * PI_RAD + startA + a / 2),
-            dr = z * UI.pie.segmentShift,
-            segment
-
-          if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
-            segment = s
-
-          S.angle = angle + a / 2
-          S.percent = alpha * percent
-          S.alpha = alpha
-          S.dx = dx
-          S.dy = dy
-          S.z = z
-          ctx.globalAlpha = masterA
-          ctx.fillStyle = S.barColor
-          ctx.beginPath()
-          ctx.moveTo(dx, dy)
-          if (V.seriesCount == 1 && !S.off) {
-            ctx.arc(0, 0, R + dr, angle, angle + 360 * PI_RAD)
-            ctx.fill()
-            break
-          } else {
-            d = dr / (360 - 180 * percent)
-            ctx.arc(dx, dy, R + dr, angle + d, angle + a + PI_RAD * alpha - d)
-          }
-          angle += a
-          ctx.fill()
-        }
-
-        if (!isNaN(segment)) {
-          if (V.segment !== segment) {
-            animate('pieZoom' + segment, 0, 1, ON_OFF_DURATION)
-            if (!isNaN(V.segment)) {
-              animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
-            }
-            V.segment = segment
-          }
-        } else if (!isNaN(V.segment)) {
-          animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
-          V.segment = undefined
-        }
-      }
+      sectorA -= 90 * PI_RAD
+      if (sectorA < 0)
+        sectorA += 2 * Math.PI
     }
+    for (s = AYL - 1; s >= 0; s--) {
+      var S = AY[s],
+        data = S.data,
+        alpha = A['on' + s],
+        selectedVal = data[V.selectedIndex] || 0,
+        percent = selectedVal / max,
+        z = A['pieZoom' + s] || 0,
+        a = (360 * percent * alpha) * PI_RAD,
+        d = 0,
+        startA = angle - 90 * PI_RAD,
+        dx = z * UI.pie.segmentShift * Math.cos(90 * PI_RAD + startA + a / 2),
+        dy = z * UI.pie.segmentShift * Math.sin(90 * PI_RAD + startA + a / 2),
+        dr = z * UI.pie.segmentShift,
+        segment
 
-    if (p < 1 || isPreview) {
-      angle = 0
+      if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
+        segment = s
 
-      for (var s = AYL - 1; s >= 0; s--) {
-        var S = AY[s],
-          selectedVal = S.data[V.selectedIndex] || 0,
-          percent = selectedVal / max,
-          sector = 180 * percent,
-          centered = false,
-          alpha = A['on' + s],
-          a = 0
-
-        if (!isPreview) {
-          a = 180 * progress * percent * alpha * PI_RAD
-          ctx.rotate(angle + a)
-        }
-
-        UI.canvas.startLine(alpha, 0, S.barColor, ctx.lineWidth)
-
-        for (var i = startIdx, val, x, y, _x = 0, startX, stack, dy; i <= endIdx; i++) {
-          stack = STACK[i] || 0
-          val = 100 * S.data[i] / TOTAL_MAX[i] * alpha
-          x = offsetX + hPadding + (AX[i] - vStart) * scaleX
-          y = offsetY - _height + _p * stack * scaleY
-          dy = isPreview ? 0 : Math.abs(x) / Math.tan((90 * _p + progress * sector) * PI_RAD)
-          if (i === startIdx) {
-            startX = x
-            ctx.moveTo(x, _p * y + dy)
-          } else {
-            if (!centered && x >= 0 && progress > 0.5) {
-              centered = true
-              ctx.lineTo(x * _p, _p * (_p * y + dy))
-            } else
-              ctx.lineTo(x, _p * y + dy)
-          }
-          if (i === endIdx) {
-            if (!S.off && !filled) {
-              filled = true
-              ctx.globalAlpha = masterA
-              ctx.fillStyle = S.barColor
-              ctx.fillRect(startX, -offsetY + 26, x - startX, 2 * offsetY)
-              if (V.seriesCount == 1)
-                break
-            } else {
-              ctx.lineTo(x, 2 * offsetY)
-              ctx.lineTo(startX, 2 * offsetY)
-            }
-          }
-          STACK[i] = stack + val
-        }
+      S.angle = angle + a / 2
+      S.percent = alpha * percent
+      S.alpha = alpha
+      S.dx = dx
+      S.dy = dy
+      S.z = z
+      ctx.globalAlpha = masterA
+      ctx.fillStyle = S.barColor
+      ctx.beginPath()
+      ctx.moveTo(dx, dy)
+      if (V.seriesCount === 1 && !S.off) {
+        ctx.arc(0, 0, R + dr, angle, angle + 360 * PI_RAD)
         ctx.fill()
-        if (!isPreview) {
-          ctx.rotate(-angle - a)
-          angle += 2 * a
-        }
-        if (V.seriesCount == 1 && !S.off)
-          break
+        break
+      } else {
+        d = dr / (360 - 180 * percent)
+        ctx.arc(dx, dy, R + dr, angle + d, angle + a + PI_RAD * alpha - d)
       }
+      angle += a
+      ctx.fill()
     }
-    if (!isPreview) {
-      ctx.restore()
-      if (p > 0.7) {
-        angle = 90 * PI_RAD
-        for (var s = AYL - 1, tp = 0; s >= 0; s--) {
-          var S = AY[s], r = R / 1.25,
-            text = Math.round((s == 0 ? 1 - tp : S.percent) * 100) + '%'
-          ctx.font = 14 + S.percent * 30 + 'px ' + FONT
-          var ts = ctx.measureText(text)
-          tp += S.percent
-          if (S.off)
-            continue
-          ctx.globalAlpha = p * S.alpha * masterA
-          ctx.fillStyle = UI.pie.textColor
-          ctx.fillText(text, UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx, UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + 2 + 2 * S.dy)
+
+    if (!isNaN(segment)) {
+      if (V.segment !== segment) {
+        animate('pieZoom' + segment, 0, 1, ON_OFF_DURATION)
+        if (!isNaN(V.segment)) {
+          animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
         }
+        V.segment = segment
       }
+    } else if (!isNaN(V.segment)) {
+      animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
+      V.segment = undefined
+    }
+
+    ctx.restore()
+    angle = 90 * PI_RAD
+    for (var s = AYL - 1, tp = 0; s >= 0; s--) {
+      var S = AY[s], r = R / 1.25,
+        text = Math.round((s === 0 ? 1 - tp : S.percent) * 100) + '%'
+      ctx.font = 14 + S.percent * 30 + 'px ' + FONT
+      var ts = ctx.measureText(text)
+      tp += S.percent
+      if (S.off)
+        continue
+      ctx.globalAlpha = S.alpha * masterA
+      ctx.fillStyle = UI.pie.textColor
+      ctx.fillText(text, UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx, UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + 2 + 2 * S.dy)
     }
   }
 
@@ -1078,7 +1005,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     ctx.globalAlpha = masterA
     if (TYPES.bar)
       renderBars(type, masterA, width, height, vStart, hPadding, offsetY, offsetX, isPreview, startIdx, endIdx, scaleX)
-    else if (TYPES.area)
+    else if (TYPES.area || (TYPES.pie && isPreview))
       renderArea(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview)
     else if (TYPES.pie)
       renderPie(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview)
@@ -1127,7 +1054,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
   function renderGrid() {
     var showLegend = V.showLegend && !isNaN(V.vLineX)
-    showLegend && (!TYPES.bar || TYPES.area) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
+    showLegend && (!(TYPES.bar || TYPES.pie) || TYPES.area) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
     if (!V.zoomedChart)
       toggleLegend(showLegend || (TYPES.area && V.isZoomed))
   }
@@ -1256,8 +1183,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
   }
 
-  function whereAmI(x, _y) {
-    var y = _y - UI.chart.topPadding
+  function whereAmI(x,y_) {
+    var y =y_ - UI.chart.topPadding
     if (y >= 0 && y < UI.main.y)
       return AREA.HEADER
     else if (y >= UI.main.y && y < UI.xAxis.y)
@@ -1306,16 +1233,16 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   this.toggleCheckbox = toggleCheckbox
 
   function toggleLegend(on) {
-    var zoomedPie = TYPES.percentage && V.isZoomed
-    if (!zoomedPie && (!on && !V.legendIsVisible || on && V.legendIsVisible))
+    var pieMode = TYPES.pie || (TYPES.percentage && V.isZoomed)
+    if (!pieMode && !(on ^ V.legendIsVisible))
       return
 
-    if (zoomedPie && isNaN(V.segment))
+    if (pieMode && isNaN(V.segment))
       return hideLegend()
 
     if (on) {
       var y, p, x = V.localStart + (V.vLineX - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
-        idx = zoomedPie ? V.selectedIndex : applyRange(Math.round((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1),
+        idx = pieMode ? V.selectedIndex : applyRange(Math.round((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1),
         scaleX = UI.preview.width / (V.localEnd - V.localStart),
         dy = TYPES.linear ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
         scaleY = (UI.main.height - dy) / A.localDY, side = 1, sum = 0
@@ -1327,10 +1254,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       ctx.lineWidth = UI.grid.markerLineWidth
       ctx.globalAlpha = 1
 
-      UI.date.stylo({ display: zoomedPie ? 'none' : 'flex' })
+      UI.date.stylo({ display: pieMode ? 'none' : 'flex' })
       for (var i = 0, pp = 0; i < AYL; i++) {
         var S = AY[i], v = S.data[idx]
-        UI['label' + i].stylo({ display: S.off || (zoomedPie && i !== V.segment) ? 'none' : 'flex', paddingTop: zoomedPie ? 0 : 5 })
+        UI['label' + i].stylo({ display: S.off || (pieMode && i !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
         if (S.off) continue
         sum += v
         if (TYPES.multi_yaxis)
@@ -1342,7 +1269,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
           if (i === AYL - 1)
             p = 1 - pp
           pp += p
-          UI['labelPercent' + i].stylo({ display: zoomedPie ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
+          UI['labelPercent' + i].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
         if (!(TYPES.bar || TYPES.percentage)) {
           if (!(_parent ^ V.isZoomed))
@@ -1360,7 +1287,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       }
 
       UI.legend.measure()
-      if (zoomedPie) {
+      if (pieMode) {
         x = V.pieX + UI.main.width / 2
         y = V.pieY + UI.main.height / 2
       } else {

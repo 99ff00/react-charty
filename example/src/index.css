@@ -20,3 +20,8 @@ h3 {
   cursor: pointer;
   margin: 20px;
 }
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
