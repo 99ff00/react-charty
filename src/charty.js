@@ -215,7 +215,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     repaint()
   }
 
-  this.setTheme = setTheme;
+  this.setTheme = setTheme
 
   start()
 
@@ -629,7 +629,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
   }
 
-  function renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY, step) {
+  function renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY) {
     height -= UI.grid.markerRadius + UI.grid.markerLineWidth
     for (var s = 0, idx, x, data, color; s < AYL; s++) {
       data = AY[s].data
@@ -638,7 +638,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       UI.canvas.startLine((1 - V.progress) * A['alphaY' + s], color, 0, ctx.lineWidth)
       idx = TYPES.multi_yaxis ? s : ''
       scaleY = height / A[type + 'DY' + idx]
-      for (var i = startIdx; i <= endIdx; i += step) {
+      for (var i = startIdx; i <= endIdx; i++) {
         x = offsetX + hPadding + (AX[i] - vStart) * scaleX
         if (i === startIdx)
           ctx.moveTo(x, offsetY - (data[i] - A[type + 'MinY' + idx]) * scaleY)
@@ -729,7 +729,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(V.selectedIndex, V.selectedIndex, MediaStream)
+        renderPie(V.selectedIndex, V.selectedIndex, masterA)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -815,7 +815,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   function renderPie(startIdx, endIdx, masterA) {
     var R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
       values = new Array(AYL), totals = 0,
-      angle = 90 * PI_RAD, segment
+      angle = 90 * PI_RAD, segment,
+      progress = TYPES.pie ? 1 : V.progress
 
     for (var s = 0; s < AYL; s++) {
       var S = AY[s], a = A['on' + s]
@@ -847,7 +848,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         alpha = A['on' + s],
         percent = values[s] / totals,
         z = A['pieZoom' + s] || 0,
-        a = (360 * V.progress * percent * alpha) * PI_RAD,
+        a = (360 * progress * percent * alpha) * PI_RAD,
         d = 0,
         startA = angle - 90 * PI_RAD,
         dx = z * UI.pie.segmentShift * Math.cos(90 * PI_RAD + startA + a / 2),
@@ -863,10 +864,12 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       S.dx = dx
       S.dy = dy
       S.z = z
+
       ctx.globalAlpha = masterA
       ctx.fillStyle = S.barColor
       ctx.beginPath()
       ctx.moveTo(dx, dy)
+
       if (V.seriesCount === 1 && !S.off) {
         ctx.arc(0, 0, R + dr, angle, angle + 360 * PI_RAD)
         ctx.fill()
@@ -894,7 +897,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     if (!TYPES.area) {
       ctx.restore()
-      renderPieLegend(V.progress, R, masterA)
+      renderPieLegend(progress, R, masterA)
     }
   }
 
@@ -902,9 +905,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     var scaleX = width / (vEnd - vStart),
       startIdx = xToIndex(vStart - hPadding / scaleX, true),
       endIdx = xToIndex(vEnd + hPadding / scaleX),
-      scaleY, step = Math.ceil((endIdx - startIdx) / (1.3 * width))
-
-    startIdx -= startIdx % step
+      scaleY
 
     ctx.globalAlpha = masterA
     if (TYPES.bar)
@@ -912,9 +913,9 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     else if (TYPES.area || (TYPES.pie && isPreview))
       renderArea(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview)
     else if (TYPES.pie)
-      renderPie(V.selectedIndex, V.selectedIndex, masterA)
+      renderPie(startIdx, endIdx, masterA)
     else if (TYPES.linear)
-      renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY, step)
+      renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY)
   }
 
   function renderMain() {
@@ -1050,8 +1051,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     if (!STATE.repaint) return
 
-    if (TYPES.percentage) {
-      if (V.forceUpdate || V.isOnOffAnimating || !TOTALS || seriesCountChanged)
+    if (TYPES.percentage || TYPES.pie) {
+      if (!TOTALS || V.forceUpdate || V.isOnOffAnimating || seriesCountChanged)
         recalcTotals()
     } else {
       if (seriesCountChanged || isZoomed || V.forceUpdate)
@@ -1095,7 +1096,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function whereAmI(x,y_) {
-    var y =y_ - UI.chart.topPadding
+    var y = y_ - UI.chart.topPadding
     if (y >= 0 && y < UI.main.y)
       return AREA.HEADER
     else if (y >= UI.main.y && y < UI.xAxis.y)
@@ -1171,6 +1172,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       ctx.globalAlpha = 1
 
       UI.date.stylo({ display: pieMode ? 'none' : 'flex' })
+
       for (var i = 0, pp = 0; i < AYL; i++) {
         var S = AY[i], v = S.data[idx]
         UI['label' + i].stylo({ display: S.off || (pieMode && i !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
@@ -1181,7 +1183,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         UI['labelName' + i].innerText = S.name
         UI['labelValue' + i].innerText = format(v)
         if (TYPES.percentage) {
-          p = v / TOTALS[V.selectedIdx]
+          p = v / TOTALS[idx]
           if (i === AYL - 1)
             p = 1 - pp
           pp += p
@@ -1666,4 +1668,4 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 }
 
-export default Charty;
+export default Charty
