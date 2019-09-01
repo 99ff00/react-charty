@@ -5,8 +5,7 @@
  */
 
 .chart {
-  position: relative;
-  overflow: hidden;
+  position: relative
 }
 .chart .header{
   height: 50px;

@@ -121,9 +121,9 @@ export default class App extends Component {
           {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} />
           <Charty title="Interactions" theme={theme} style={style} {...data[1]} />
           <Charty title="Messages" theme={theme} style={style} {...data[2]} />
-          <Charty title="Views" theme={theme} style={style} {...data[3]} />
-          <Charty title="Fruits" theme={theme} style={style} {...data[4]} /> */}
-          <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} />
+          <Charty title="Views" theme={theme} style={style} {...data[3]} /> */}
+          <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
+          {/* <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} /> */}
         </div>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>
