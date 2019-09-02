@@ -34,7 +34,7 @@ var CHART = '<div id=|header>\
   ON_OFF_DURATION = 150,
   ZOOM_IN_DURATION = 300,
   ZOOM_OUT_DURATION = 300,
-  SNAP_DURATION = 500,
+  SNAP_DURATION = 300,
   LEGEND_TIMER = 10000,
   AREA = { HEADER: 1, MAIN: 2, XAXIS: 3, PREVIEW: 4, BRUSH_CENTER: 5, BRUSH_LEFT: 6, BRUSH_RIGHT: 7 },
   IS_MOBILE = window.orientation !== undefined,
@@ -1467,18 +1467,18 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       hideLegend()
     }
 
-    if (!chart.x_on_zoom) {
+    if (!chart.onZoomIn || TYPES.pie) {
       if (TYPES.percentage)
         doZoom()
       return
     }
 
-    chart.x_on_zoom(AX[selectedIndex]).then(function (data) {
+    chart.onZoomIn(AX[selectedIndex]).then(function (data) {
       V.zoomedChart = new Charty(ID, data, self, UI, ctx)
       repaint()
       doZoom()
     }, function (error) {
-      alert('Error loading file: ' + JSON.stringify(error) + '\n\nx: ' + date)
+        error('Error loading data: ' + JSON.stringify(error) + '\n\nx: ' + AX[selectedIndex])
     })
   }
 

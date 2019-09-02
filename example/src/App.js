@@ -105,6 +105,21 @@ export default class App extends Component {
     document.documentElement.className = !isDarkTheme && 'dark';
   }
 
+  onZoomIn = async (id, x) => {
+    var d = new Date(x),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    var file = 'data/' + id + '/' + year + '-' + month + '/' + day + '.json',
+        response = await fetch(file)
+
+    return response.json()
+  }
+
   render () {
     if (!this.state.isLoaded)
       return null;
@@ -118,10 +133,10 @@ export default class App extends Component {
       <React.Fragment>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
         <div className="container">
-          <Charty title="Followers" theme={theme} style={style} {...data[0]} />
-          {/* <Charty title="Interactions" theme={theme} style={style} {...data[1]} />
-          <Charty title="Messages" theme={theme} style={style} {...data[2]} />
-          <Charty title="Views" theme={theme} style={style} {...data[3]} /> */}
+          <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
+          <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
+          <Charty title="Messages" theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
+          <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
           <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
           <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>

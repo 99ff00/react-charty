@@ -140,7 +140,11 @@ export default class App extends Component {
 |`names`          |Object       |Contains the names for data series, referenced by key. For example, `names: { y0: 'Views', y1: 'Clicks' }`|
 |`colors`         |Object       |Contains the colors for data series, referenced by key. For example, `colors: { y0: '#4BD964', y1: '#FE3C30' }`|
 |`animated`       |Boolean      |Enables/disables animations and transitions, default value is `true`.|
-|`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, if you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
+|`startX`         |Number       |The starting value for .|
+|`endX`           |Number       |The starting value for .|
+|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. |
+|`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, i
+f you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
 |`showLegend`     |Boolean      |If set to `false` the legend will not appear when moving cursor over the chart (or tapping chart area on mobile). The default value is `true`.|
 |`legendPosition` |Boolean      |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the popup will follow the mouse cursor position.|
 |`showPreview`    |Boolean      |If set to `false` the chart preview won't be visible. The default value is `true`.|

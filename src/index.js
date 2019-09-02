@@ -20,7 +20,8 @@ export default class Charty extends Component {
     data: PropTypes.object,
     stepX: PropTypes.number,
     startX: PropTypes.number,
-    endX: PropTypes.number
+    endX: PropTypes.number,
+    onZoomIn: PropTypes.func
   }
 
   componentDidMount() {
