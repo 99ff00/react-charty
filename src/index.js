@@ -17,7 +17,10 @@ export default class Charty extends Component {
     showButtons: PropTypes.bool,
     showPreview: PropTypes.bool,
     legendPosition: PropTypes.string,
-    data: PropTypes.object
+    data: PropTypes.object,
+    stepX: PropTypes.number,
+    startX: PropTypes.number,
+    endX: PropTypes.number
   }
 
   componentDidMount() {

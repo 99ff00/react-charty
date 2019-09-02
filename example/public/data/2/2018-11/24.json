@@ -519,5 +519,6 @@
       1700
     ]
   },
-  "type": "multi_yaxis"
+  "type": "multi_yaxis",
+  "stepX": 86400000
 }

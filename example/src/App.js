@@ -112,18 +112,18 @@ export default class App extends Component {
     const width = IS_MOBILE ? '100%' : '50%',
       theme = this.state.theme,
       data = this.state.data,
-      style = { width, paddingTop: 20 }
+      style = { width, marginTop: 20 }
 
     return (
       <React.Fragment>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
         <div className="container">
-          {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} />
-          <Charty title="Interactions" theme={theme} style={style} {...data[1]} />
+          <Charty title="Followers" theme={theme} style={style} {...data[0]} />
+          {/* <Charty title="Interactions" theme={theme} style={style} {...data[1]} />
           <Charty title="Messages" theme={theme} style={style} {...data[2]} />
           <Charty title="Views" theme={theme} style={style} {...data[3]} /> */}
           <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
-          <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} showPreview={false} />
+          <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>

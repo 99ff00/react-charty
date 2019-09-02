@@ -34,7 +34,7 @@ var CHART = '<div id=|header>\
   ON_OFF_DURATION = 150,
   ZOOM_IN_DURATION = 300,
   ZOOM_OUT_DURATION = 300,
-  SNAP_DURATION = 200,
+  SNAP_DURATION = 500,
   LEGEND_TIMER = 10000,
   AREA = { HEADER: 1, MAIN: 2, XAXIS: 3, PREVIEW: 4, BRUSH_CENTER: 5, BRUSH_LEFT: 6, BRUSH_RIGHT: 7 },
   IS_MOBILE = window.orientation !== undefined,
@@ -171,7 +171,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
   var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = _ctx,
     IDs = [ID], AY = [], AYL, AX, AXL, X = {}, TYPES = {},
-    TOTALS, STREE_MIN = [], STREE_MAX = [], animations = {}, A = { previewA: 1 },
+    TOTALS, PERCENTS = [], STREE_MIN = [], STREE_MAX = [], animations = {}, A = { previewA: 1 },
     STATE = {}, myIdx = CHARTS.length,
     currentTheme,
     UI = _UI || {
@@ -210,8 +210,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       s.barColor = (currentTheme.bars || {})[s.name] || s.color
       s.lineColor = (currentTheme.lines || {})[s.name] || s.color
     }
-    V.stepX = undefined
-    V.stepY = undefined
+    V.stepGridX = undefined
+    V.stepGridY = undefined
     repaint()
   }
 
@@ -333,6 +333,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     V.showLegend = chart.showLegend !== false
     V.showButtons = chart.showButtons !== false
     V.showPreview = chart.showPreview !== false
+    V.stepX = chart.stepX || 1
 
     Object.keys(chart.data).forEach(function(n) {
       var data = chart.data[n]
@@ -364,8 +365,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       A['on' + i] = 1
     }
 
-    V.localStart = 2 / 3 * X.d + X.min
-    V.localEnd = X.max
+    V.localStart = chart.startX || 2 / 3 * X.d + X.min
+    V.localEnd = chart.endX || X.max
     V.globalStart = X.min
     V.globalEnd = X.max
     V.minBrushSize = X.d * UI.preview.minBrushSize / 100
@@ -524,47 +525,47 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       scaleY = UI.main.height / localD,
       start = xToIndex(V.localStart - UI.chart.hPadding / scaleX, true),
       end = xToIndex(V.localEnd + UI.chart.hPadding / scaleX),
-      y = UI.xAxis.y + UI.xAxis.height / 2, minStep,
-      stepX = Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
-      stepY = Math.round(localD / UI.yAxis.textCount) || 1,
-      d = 5 * Math.pow(10, (stepY.toString().length - 2)) || 1
+      y = UI.xAxis.y + UI.xAxis.height / 2,
+      stepGridX = Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
+      stepGridY = Math.round(localD / UI.yAxis.textCount) || 1,
+      d = 5 * Math.pow(10, (stepGridY.toString().length - 2)) || 1
 
-    stepY = Math.max(1, Math.round(stepY / d) * d)
+    stepGridY = Math.max(1, Math.round(stepGridY / d) * d)
 
-    if (V.stepX !== stepX) {
-      if (V.stepX) {
-        if (V.stepX < stepX)
-          animate('stepXA' + V.stepX, 1, 0, UI.xAxis.fadeTime)
-        V.prevStepX = V.stepX
+    if (V.stepGridX !== stepGridX) {
+      if (V.stepGridX) {
+        if (V.stepGridX < stepGridX)
+          animate('stepGridXA' + V.stepGridX, 1, 0, UI.xAxis.fadeTime)
+        V.prevStepGridX = V.stepGridX
       }
-      if (!V.prevStepX || stepX < V.prevStepX)
-        animate('stepXA' + stepX, 0, 1, UI.xAxis.fadeTime)
-      if (stepX > V.prevStepX)
-        A['stepXA' + stepX] = 1
-      V.stepX = stepX
+      if (!V.prevStepGridX || stepGridX < V.prevStepGridX)
+        animate('stepGridXA' + stepGridX, 0, 1, UI.xAxis.fadeTime)
+      if (stepGridX > V.prevStepGridX)
+        A['stepGridXA' + stepGridX] = 1
+      V.stepGridX = stepGridX
     }
 
-    if (V.prevStepX)
-      renderXText(1, V.prevStepX, start, end, scaleX, y, 1 - p)
+    if (V.prevStepGridX)
+      renderXText(1, V.prevStepGridX, start, end, scaleX, y, 1 - p)
 
-    renderXText(0, stepX, start, end, scaleX, y, 1 - p)
+    renderXText(0, stepGridX, start, end, scaleX, y, 1 - p)
 
-    if (V.stepY !== stepY) {
-      if (V.stepY) {
-        animate('stepYA' + V.stepY, 1, 0, UI.yAxis.fadeTime / 2, 0, 0, function () {
-          V.prevStepY = 0
+    if (V.stepGridY !== stepGridY) {
+      if (V.stepGridY) {
+        animate('stepGridYA' + V.stepGridY, 1, 0, UI.yAxis.fadeTime / 2, 0, 0, function () {
+          V.prevStepGridY = 0
           V.yPos = []
         })
-        V.prevStepY = V.stepY
+        V.prevStepGridY = V.stepGridY
       }
-      animate('stepYA' + stepY, 0, 1, UI.yAxis.fadeTime)
-      V.stepY = stepY
+      animate('stepGridYA' + stepGridY, 0, 1, UI.yAxis.fadeTime)
+      V.stepGridY = stepGridY
     }
 
-    if (V.prevStepY)
-      renderYText(1, V.prevStepY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, 1 - p)
+    if (V.prevStepGridY)
+      renderYText(1, V.prevStepGridY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, 1 - p)
 
-    renderYText(0, stepY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, 1 - p)
+    renderYText(0, stepGridY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, 1 - p)
 
     if (TYPES.percentage) {
       ctx.globalAlpha = UI.xAxis.textAlpha * (1 - p)
@@ -573,28 +574,28 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
   }
 
-  function renderXText(prevStep, stepX, start, end, scaleX, y, p) {
-    var a = A['stepXA' + stepX] * UI.xAxis.textAlpha * p
+  function renderXText(prevStep, stepGridX, start, end, scaleX, y, p) {
+    var a = A['stepGridXA' + stepGridX] * UI.xAxis.textAlpha * p
     if (a === 0) return
-    start -= start % stepX
+    start -= start % stepGridX
     ctx.fillStyle = UI.xAxis.textColor
     ctx.globalAlpha = a
-    for (var i = start, x; i <= end; i += stepX) {
-      if (!prevStep && stepX < V.prevStepX && i % V.prevStepX === 0) continue
-      if (prevStep && stepX > V.prevStepX && i % V.prevStepX === 0) continue
-      if (prevStep && V.stepX > V.prevStepX && i % V.stepX === 0) continue
+    for (var i = start, x; i <= end; i += stepGridX) {
+      if (!prevStep && stepGridX < V.prevStepGridX && i % V.prevStepGridX === 0) continue
+      if (prevStep && stepGridX > V.prevStepGridX && i % V.prevStepGridX === 0) continue
+      if (prevStep && V.stepGridX > V.prevStepGridX && i % V.stepGridX === 0) continue
       x = UI.chart.hPadding + (AX[i] - V.localStart) * scaleX
       ctx.fillText((_parent) ? unixToTime(AX[i]) : unixToD(AX[i]), x, y)
     }
   }
 
-  function renderYText(prevStep, stepY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, p) {
+  function renderYText(prevStep, stepGridY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, p) {
     var y = localMin, y_, yPos, val, c = 0, a0 = TYPES.multi_yaxis ? A['alphaY0'] : 1,
       a1 = TYPES.multi_yaxis ? A['alphaY1'] : 1,
-      a = A['stepYA' + stepY], v
+      a = A['stepGridYA' + stepGridY], v
 
     while (y < localMax) {
-      y_ = (c === 0) && stepY > 10 ? Math.ceil(y / 10) * 10 : y
+      y_ = (c === 0) && stepGridY > 10 ? Math.ceil(y / 10) * 10 : y
 
       yPos = UI.xAxis.y - (y - localMin) * scaleY
       if (prevStep && c > 0) {
@@ -620,11 +621,11 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       UI.canvas.line(UI.chart.hPadding, yPos, UI.main.width - UI.chart.hPadding, yPos, UI.grid.lineWidth, UI.grid.color, a * UI.grid.alpha * p)
       if (!prevStep)
         V.yPos[c] = yPos
-      if (c === 0 && stepY > 10) {
-        y_ = y_ + (stepY - y_ % stepY)
-        y = y_ - y < stepY * 0.6 ? y_ + stepY : y_
+      if (c === 0 && stepGridY > 10) {
+        y_ = y_ + (stepGridY - y_ % stepGridY)
+        y = y_ - y < stepGridY * 0.6 ? y_ + stepGridY : y_
       } else
-        y += stepY
+        y += stepGridY
       c++
     }
   }
@@ -855,6 +856,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         dy = z * UI.pie.segmentShift * Math.sin(90 * PI_RAD + startA + a / 2),
         dr = z * UI.pie.segmentShift
 
+      PERCENTS[s] = percent
+
       if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
         segment = s
 
@@ -1077,6 +1080,9 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       renderMain()
       renderPreview()
       renderAxis()
+
+      // ctx.globalAlpha = .5
+      // UI.canvas.rect(0, UI.main.y, UI.main.width, UI.main.height)
     }
     STATE.repaint = false
     V.forceUpdate = false
@@ -1095,25 +1101,27 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
   }
 
-  function whereAmI(x,y_) {
-    var y = y_ - UI.chart.topPadding
-    if (y >= 0 && y < UI.main.y)
-      return AREA.HEADER
-    else if (y >= UI.main.y && y < UI.xAxis.y)
-      return AREA.MAIN
+  function whereAmI(x, y_) {
+    var y = y_ - UI.chart.topPadding,
+      area = AREA.HEADER
+
+    if (y >= UI.main.y && y < UI.xAxis.y)
+      area = AREA.MAIN
     else if (y >= UI.xAxis.y && y < UI.preview.y)
-      return AREA.XAXIS
+      area = AREA.XAXIS
     else if (y >= UI.preview.y) {
       var start = xToPreview(V.localStart),
         end = xToPreview(V.localEnd)
       if (x >= start - UI.preview.hitSlop && x <= start + UI.preview.handleW + UI.preview.hitSlop / 2)
-        return AREA.BRUSH_LEFT
+        area = AREA.BRUSH_LEFT
       else if (x > start + UI.preview.handleW && x < end - UI.preview.handleW - UI.preview.hitSlop / 2)
-        return AREA.BRUSH_CENTER
+        area = AREA.BRUSH_CENTER
       else if (x >= end - UI.preview.handleW - UI.preview.hitSlop / 2 && x < end + UI.preview.hitSlop)
-        return AREA.BRUSH_RIGHT
-      return AREA.PREVIEW
+        area = AREA.BRUSH_RIGHT
+      else
+        area = AREA.PREVIEW
     }
+    return area
   }
 
   function updateCheckbox(i, off) {
@@ -1133,7 +1141,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     updateCheckbox(i, s.off)
 
-    if (TYPES.stacked || TYPES.bar || TYPES.percentage) {
+    if (TYPES.stacked || TYPES.bar || TYPES.percentage || TYPES.pie) {
       V.isOnOffAnimating = true
       animate('on' + i, from, to, ON_OFF_DURATION, 0, s.off ? EASE.outQuad : EASE.inQuad, function() {
         V.isOnOffAnimating = false
@@ -1173,27 +1181,27 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
       UI.date.stylo({ display: pieMode ? 'none' : 'flex' })
 
-      for (var i = 0, pp = 0; i < AYL; i++) {
-        var S = AY[i], v = S.data[idx]
-        UI['label' + i].stylo({ display: S.off || (pieMode && i !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
+      for (var s = 0, pp = 0; s < AYL; s++) {
+        var S = AY[s], v = S.data[idx]
+        UI['label' + s].stylo({ display: S.off || (pieMode && s !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
         if (S.off) continue
         sum += v
         if (TYPES.multi_yaxis)
-          scaleY = (UI.main.height - dy) / A['localDY' + i]
-        UI['labelName' + i].innerText = S.name
-        UI['labelValue' + i].innerText = format(v)
-        if (TYPES.percentage) {
+          scaleY = (UI.main.height - dy) / A['localDY' + s]
+        UI['labelName' + s].innerText = S.name
+        UI['labelValue' + s].innerText = format(v)
+        if (TYPES.percentage || TYPES.pie) {
           p = v / TOTALS[idx]
-          if (i === AYL - 1)
+          if (s === AYL - 1)
             p = 1 - pp
           pp += p
-          UI['labelPercent' + i].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
+          UI['labelPercent' + s].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
         if (!(TYPES.bar || TYPES.percentage)) {
           if (!(_parent ^ V.isZoomed))
             ctx.strokeStyle = S.color
           ctx.beginPath()
-          ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (TYPES.multi_yaxis ? i : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
+          ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (TYPES.multi_yaxis ? s : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
           ctx.stroke()
           ctx.fill()
         }
@@ -1213,7 +1221,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         x = applyRange(V.vLineX - UI.grid.legendShift - side * (UI.legend.w - 2 * UI.grid.legendShift), 2, UI.main.width - UI.legend.w - 2)
         if (chart.legendPosition === 'top') y = UI.chart.topPadding
         else if (chart.legendPosition === 'bottom') y = UI.xAxis.y - UI.legend.h + 40
-        else y = applyRange(V.vLineY - UI.legend.h - (IS_MOBILE ? 50 : 10), UI.chart.topPadding, UI.xAxis.y - UI.legend.h + 20)
+        else y = applyRange(V.vLineY - UI.legend.h - (IS_MOBILE ? 50 : 10), UI.chart.topPadding, UI.xAxis.y - UI.legend.h)
       }
       UI.legend.stylo({ opacity: 1, transform: 'translate3d(' + x + 'px, ' + y + 'px, 0)' }, true)
 
@@ -1435,14 +1443,17 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
       animate('zoomPreview', 0, 1, d, function (v) {
         var p = Math.min(1, v), p_ = (1 - p)
+
         V.globalStart = currentGlobalStart - p * (currentGlobalStart - V.zoomStart)
         V.globalEnd = currentGlobalEnd - p * (currentGlobalEnd - V.zoomEnd)
         V.localStart = currentLocalStart - p * (currentLocalStart - selectedDate)
         V.localEnd = currentLocalEnd - p * (currentLocalEnd - (selectedDate + ONE_DAY))
+
         UI.title.stylo({ opacity: p_, transform: 'scale(' + p_ + ', ' + p_ + ')' }, true)
         UI.zoom.stylo({ opacity: p, transform: 'scale(' + p + ', ' + p + ')' }, true)
         UI.localRange.stylo({ opacity: p_, transform: 'scale(' + p_ + ', ' + p_ + ')' }, true)
         UI.zoomedRange.stylo({ opacity: p, transform: 'scale(' + p + ', ' + p + ')' }, true)
+
         updateRangeText(UI.zoomedRange)
         updateZoomedChart()
       }, EASE.outCubic, function () {
@@ -1548,14 +1559,16 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
   function moveBrush(newLocalStart, newLocalEnd) {
     if (V.movingBrush) return
-    V.movingBrush = 1
+    if (newLocalStart === V.localStart && newLocalEnd === V.localEnd) return
+    V.movingBrush = true
     var start = V.localStart, end = V.localEnd
-    animate('snapDay', 0, 1, SNAP_DURATION, function (p) {
-      V.localStart = start - p * (start - newLocalStart)
-      V.localEnd = end - p * (end - newLocalEnd)
+    animate('snapX', 0, 1, SNAP_DURATION, function (p) {
+      V.localStart = applyRange(start - p * (start - newLocalStart), X.min, X.max)
+      V.localEnd = applyRange(end - p * (end - newLocalEnd), X.min, X.max)
       updateZoomedChart()
     }, 0, function () {
-      V.movingBrush = 0
+      V.movingBrush = false
+      V.forceUpdate = true
       updateRangeText(UI.zoomedRange)
     })
     updateZoomedChart()
@@ -1583,7 +1596,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       V.pieX = undefined
       V.pieY = undefined
 
-      if (!V.isZoomed || !TYPES.percentage) {
+      if (!V.isZoomed || !TYPES.area) {
         if (area === AREA.MAIN) {
           V.vLineX = x
           V.vLineY = y
@@ -1616,32 +1629,36 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       }
 
       var width = V.localEnd - V.localStart,
-        newLocalStart, newLocalEnd
+        newLocalStart, newLocalEnd, deltaX
 
       if (STATE.draggingArea === AREA.BRUSH_LEFT) {
         newLocalStart = applyRange((x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.isZoomed ? V.globalEnd : V.localEnd - V.minBrushSize)
-        if (V.isZoomed) {
-          if (!TYPES.percentage && Math.abs(V.localStart - newLocalStart) > 0.6 * ONE_DAY && newLocalStart < V.localEnd - 0.5 * ONE_DAY)
-            moveBrush(roundDate(newLocalStart), V.localEnd)
-        } else
+        deltaX = V.localStart - newLocalStart
+        if (Math.abs(deltaX) / V.stepX >= 1)
           V.localStart = newLocalStart
+        else {
+          if (Math.abs(deltaX) > V.stepX * 0.5)
+            moveBrush(V.localStart - V.stepX * Math.round(deltaX / V.stepX), V.localEnd)
+        }
       } else if (STATE.draggingArea === AREA.BRUSH_RIGHT) {
         newLocalEnd = applyRange((x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.isZoomed ? 0 : V.localStart + V.minBrushSize, V.globalEnd)
-        if (V.isZoomed) {
-          if (!TYPES.percentage && Math.abs(newLocalEnd - V.localEnd) > 0.5 * ONE_DAY && newLocalEnd > V.localStart + 0.7 * ONE_DAY)
-            moveBrush(V.localStart, roundDate(newLocalEnd))
-        } else
+        deltaX = V.localEnd - newLocalEnd
+        if (Math.abs(deltaX) / V.stepX >= 1)
           V.localEnd = newLocalEnd
+        else {
+          if (Math.abs(deltaX) > V.stepX * 0.5)
+            moveBrush(V.localStart, V.localEnd - V.stepX * Math.round(deltaX / V.stepX))
+        }
       } else if (STATE.draggingArea === AREA.BRUSH_CENTER) {
         newLocalStart = applyRange((x - V.deltaDragX - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.globalEnd - width)
         newLocalEnd = applyRange(newLocalStart + width, V.globalStart, V.globalEnd)
-        if (V.isZoomed || TYPES.pie) {
-          if (Math.abs(V.localStart - newLocalStart) > 0.7 * ONE_DAY)
-            moveBrush(roundDate(newLocalStart), roundDate(newLocalStart) + (V.localEnd - V.localStart))
-          V.selectedIndex = applyRange(Math.round((AXL - 1) * (newLocalStart - X.min) / X.d), 0, AXL - 1)
-        } else {
+        deltaX = V.localEnd - newLocalEnd
+        if (Math.abs(deltaX) / V.stepX >= 1) {
           V.localStart = newLocalStart
           V.localEnd = newLocalEnd
+        } else {
+          if (Math.abs(deltaX) > V.stepX * 0.5)
+            moveBrush(V.localStart - V.stepX * Math.round(deltaX / V.stepX), V.localEnd - V.stepX * Math.round(deltaX / V.stepX))
         }
       }
     })

@@ -1379,5 +1379,6 @@
       20
     ]
   },
-  "type": "stacked_bar"
+  "type": "stacked_bar",
+  "stepX": 86400000
 }

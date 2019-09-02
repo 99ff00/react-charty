@@ -507,5 +507,6 @@
       0
     ]
   },
-  "type": "line"
+  "type": "line",
+  "stepX": 86400000
 }
