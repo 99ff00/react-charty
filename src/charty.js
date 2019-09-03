@@ -163,18 +163,18 @@ function querySTree(T, len, leftIdx, rightIdx, cmp, fail) {
   return querySTree_(T, leftIdx, rightIdx, 0, len - 1, 0, cmp, fail)
 }
 
-var Charty = function (_ID, chart, _parent, _UI, _ctx) {
-  var ID = typeof _ID === 'object' ? _ID.id : _ID
+var Charty = function (ID_, chart, parent, UI_, ctx_) {
+  var ID = typeof ID_ === 'object' ? ID_.id : ID_
 
   if (!ID)
-    ID = _ID.id = 'charty-' + CHARTS.length
+    ID = ID_.id = 'charty-' + CHARTS.length
 
-  var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = _ctx,
+  var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = ctx_,
     IDs = [ID], AY = [], AYL, AX, AXL, X = {}, TYPES = {},
     TOTALS, PERCENTS = [], STREE_MIN = [], STREE_MAX = [], animations = {}, A = { previewA: 1 },
     STATE = {}, myIdx = CHARTS.length,
     currentTheme,
-    UI = _UI || {
+    UI = UI_ || {
       chart: { topPadding: 50, hPadding: 15, height: 400 },
       pie: { textColor: '#fff', segmentShift: 5 },
       preview: { height: 46, vPadding: 1, radius: 8, lineWidth: 1, handleW: 9, handleTick: 10, minBrushSize: 10, hitSlop: 10 },
@@ -236,8 +236,8 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function updateTheme() {
-    if (_parent)
-      setTheme(_parent.getTheme())
+    if (parent)
+      setTheme(parent.getTheme())
     else if (currentTheme)
       setTheme(currentTheme)
     else {
@@ -375,10 +375,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     V.seriesCount = AYL
     V.avgRange = 1
 
-    if (_parent) {
+    if (parent) {
       renderLegend()
-      renderCtrls(_parent.getSeries())
-      _parent.togglePreview(V.showPreview)
+      renderCtrls(parent.getSeries())
+      parent.togglePreview(V.showPreview)
     } else {
       byId(ID).innerHTML = parse(CHART)
       IDs.map(flerken)
@@ -432,7 +432,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       }
 
       repaint()
-      _parent && _parent.repaint()
+      parent && parent.repaint()
     }
 
     if (completed)
@@ -473,7 +473,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     var h = UI.preview.height, minH = UI.preview.minHeight, w = UI.preview.width,
       a = A['previewA']
 
-    if (!_parent)
+    if (!parent)
       ctx.clearRect(0, UI.xAxis.y + 5, UI.main.width, UI.xAxis.height + h)
 
     if (!V.showPreview)
@@ -585,7 +585,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       if (prevStep && stepGridX > V.prevStepGridX && i % V.prevStepGridX === 0) continue
       if (prevStep && V.stepGridX > V.prevStepGridX && i % V.stepGridX === 0) continue
       x = UI.chart.hPadding + (AX[i] - V.localStart) * scaleX
-      ctx.fillText((_parent) ? unixToTime(AX[i]) : unixToD(AX[i]), x, y)
+      ctx.fillText((parent) ? unixToTime(AX[i]) : unixToD(AX[i]), x, y)
     }
   }
 
@@ -976,6 +976,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     return AY
   }
 
+  this.getParams = function () {
+    return chart
+  }
+
   function updateRangeText(el, _start, _end) {
     var start = _start || V.localStart,
       end = _end || V.localEnd
@@ -1073,7 +1077,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     V.prevGlobalEnd = V.globalEnd
 
     if (!V.hidden) {
-      if (!_parent) ctx.clearRect(0, UI.main.y - 5, UI.main.width, UI.chart.height)
+      if (!parent) ctx.clearRect(0, UI.main.y - 5, UI.main.width, UI.chart.height)
 
       renderMain()
       renderPreview()
@@ -1196,7 +1200,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
           UI['labelPercent' + s].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
         if (!(TYPES.bar || TYPES.percentage)) {
-          if (!(_parent ^ V.isZoomed))
+          if (!(parent ^ V.isZoomed))
             ctx.strokeStyle = S.color
           ctx.beginPath()
           ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (TYPES.multi_yaxis ? s : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
@@ -1237,7 +1241,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function dismiss() {
-    if (_parent)
+    if (parent)
       return
     if (hideLegend())
       repaint()
