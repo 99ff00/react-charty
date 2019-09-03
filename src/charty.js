@@ -200,10 +200,8 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     for (var i = 0; i < AYL; i++) {
       var s = AY[i]
       if (UI['checkbox' + i]) {
-        if (theme.buttons) {
-          // UI['checkbox' + i].stylo({ backgroundColor: theme.buttons[s.name], borderColor: theme.buttons[s.name] })
+        if (theme.buttons)
           UI['name' + i].stylo({ color: theme.buttons[s.name] })
-        }
         if (UI['labelValue' + i] && theme.labels)
           UI['labelValue' + i].stylo({ color: theme.labels[s.name] })
       }
@@ -960,7 +958,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
 
   function renderGrid() {
     var showLegend = V.showLegend && !isNaN(V.vLineX)
-    showLegend && (!(TYPES.bar || TYPES.pie) || TYPES.area) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
+    showLegend && (!(TYPES.bar || TYPES.pie) || TYPES.area || !V.zoomedChart) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
     if (!V.zoomedChart)
       toggleLegend(showLegend || (TYPES.area && V.isZoomed))
   }
@@ -1200,8 +1198,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
           UI['labelPercent' + s].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
         if (!(TYPES.bar || TYPES.percentage)) {
-          if (!(parent ^ V.isZoomed))
-            ctx.strokeStyle = S.color
+          ctx.strokeStyle = S.color
           ctx.beginPath()
           ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (TYPES.multi_yaxis ? s : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
           ctx.stroke()
