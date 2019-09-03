@@ -7,7 +7,7 @@ Big ups to the Telegram team.
 
 ### Features
 
-- Small footprint (it's just 11KB minified and gzipped)
+- Small footprint (it's just 14KB minified and gzipped)
 - The following charts are supported: line, multi_yaxis line, stacked bars, percentage, pie
 - Supports thousands of records (thanks to the fast Segment Tree algorithm)
 - A wide variety of supported browsers on different platforms (including mobiles)

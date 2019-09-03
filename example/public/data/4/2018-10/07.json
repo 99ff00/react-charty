@@ -1171,6 +1171,7 @@
       13200
     ]
   },
+  "showPreview": false,
   "type": "bar",
   "stepX": 86400000
 }

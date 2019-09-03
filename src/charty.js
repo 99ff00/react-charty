@@ -301,12 +301,14 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     updateTheme()
   }
 
-  this.togglePreview = function (on) {
+  function togglePreview(on) {
     animate('previewA', on ? 0 : 1, on, 2 * ON_OFF_DURATION)
     var d = on ? 0 : UI.preview.height + 10
     UI.ctrls.stylo({ transform: 'translate3d(0, -' + d + 'px, 0)' })
     V.previewOff = !on
   }
+
+  this.togglePreview = togglePreview
 
   function restorePreview() {
     if (V.previewOff)
@@ -376,15 +378,13 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     if (_parent) {
       renderLegend()
       renderCtrls(_parent.getSeries())
-      if ((AX[AXL - 1] - AX[1]) / ONE_DAY <= 3) {
-        chart.oneDay = true
-        _parent.togglePreview(0)
-      }
+      _parent.togglePreview(V.showPreview)
     } else {
       byId(ID).innerHTML = parse(CHART)
       IDs.map(flerken)
       renderLegend()
       renderCtrls(AY)
+      togglePreview(V.showPreview)
       UI.title.innerText = chart.title
       ctx = UI.canvas.getContext('2d')
       hookEvents()
@@ -470,14 +470,14 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
   }
 
   function renderPreview() {
-    if (!V.showPreview)
-      return
-    if (chart.oneDay)
-      return
     var h = UI.preview.height, minH = UI.preview.minHeight, w = UI.preview.width,
       a = A['previewA']
+
     if (!_parent)
       ctx.clearRect(0, UI.xAxis.y + 5, UI.main.width, UI.xAxis.height + h)
+
+    if (!V.showPreview)
+      return
 
     ctx.save()
     UI.canvas.rect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, w, minH, UI.preview.radius, true, true, true)
@@ -940,8 +940,6 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
 
     if (V.prevW !== ww || V.prevH !== wh) {
-      if (!V.showPreview)
-        UI.preview.height = 0
       V.prevW = ww
       V.prevH = wh
       UI.box.measure()
@@ -1434,16 +1432,14 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     function doZoom() {
       var d = ZOOM_IN_DURATION
-      if (TYPES.percentage)
+      if (TYPES.area)
         d *= 2
       V.isZooming = true
-      animate('zoomMain', 0, 1, d, function (v) {
-        V.progress = v
-      }, TYPES.percentage ? EASE.outBack : EASE.outSine)
 
-      animate('zoomPreview', 0, 1, d, function (v) {
+      animate('zoomIn', 0, 1, d, function (v) {
         var p = Math.min(1, v), p_ = (1 - p)
 
+        V.progress = v
         V.globalStart = currentGlobalStart - p * (currentGlobalStart - V.zoomStart)
         V.globalEnd = currentGlobalEnd - p * (currentGlobalEnd - V.zoomEnd)
         V.localStart = currentLocalStart - p * (currentLocalStart - selectedDate)
@@ -1456,9 +1452,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
         updateRangeText(UI.zoomedRange)
         updateZoomedChart()
-      }, EASE.outCubic, function () {
+      }, TYPES.area ? EASE.outBack : EASE.outCubic, function () {
         V.isZooming = false
         V.isZoomed = true
+        V.forceUpdate = true
         resize()
         if (V.zoomedChart)
           V.zoomedChart.wakeUp()
@@ -1468,7 +1465,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
     }
 
     if (!chart.onZoomIn || TYPES.pie) {
-      if (TYPES.percentage)
+      if (TYPES.area)
         doZoom()
       return
     }
@@ -1477,14 +1474,14 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       V.zoomedChart = new Charty(ID, data, self, UI, ctx)
       repaint()
       doZoom()
-    }, function (error) {
-        error('Error loading data: ' + JSON.stringify(error) + '\n\nx: ' + AX[selectedIndex])
+    }, function (err) {
+        error('Error loading data: ' + JSON.stringify(err) + '\n\nx: ' + AX[selectedIndex])
     })
   }
 
   this.setProgress = function (V_) {
-    SHARED_PROPS.forEach(function (p) {
-      V[p] = V_[p]
+    SHARED_PROPS.forEach(function (prop) {
+      V[prop] = V_[prop]
     })
     V.progress = (1 - V_.progress)
     repaint()
@@ -1503,20 +1500,22 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
 
     V.isZooming = true
     animate('zoomOut', 1, 0, ZOOM_OUT_DURATION, function (v) {
-      V.globalStart = currentGlobalStart - (1 - v) * (currentGlobalStart - V._globalStart)
-      V.globalEnd = currentGlobalEnd - (1 - v) * (currentGlobalEnd - V._globalEnd)
-      V.localStart = currentLocalStart - (1 - v) * (currentLocalStart - V._localStart)
-      V.localEnd = currentLocalEnd - (1 - v) * (currentLocalEnd - V._localEnd)
+      var v_ = 1 - v
+      V.globalStart = currentGlobalStart - v_ * (currentGlobalStart - V._globalStart)
+      V.globalEnd = currentGlobalEnd - v_ * (currentGlobalEnd - V._globalEnd)
+      V.localStart = currentLocalStart - v_ * (currentLocalStart - V._localStart)
+      V.localEnd = currentLocalEnd - v_ * (currentLocalEnd - V._localEnd)
       V.progress = v
-      UI.title.stylo({ opacity: (1 - v), transform: 'scale(' + (1 - v) + ', ' + (1 - v) + ')' }, true)
+      UI.title.stylo({ opacity: v_, transform: 'scale(' + v_ + ', ' + v_ + ')' }, true)
       UI.zoom.stylo({ opacity: v, transform: 'scale(' + v + ', ' + v + ')' }, true)
-      UI.localRange.stylo({ opacity: (1 - v), transform: 'scale(' + (1 - v) + ', ' + (1 - v) + ')' }, true)
+      UI.localRange.stylo({ opacity: v_, transform: 'scale(' + v_ + ', ' + v_ + ')' }, true)
       UI.zoomedRange.stylo({ opacity: v, transform: 'scale(' + v + ', ' + v + ')' }, true)
       updateRangeText(UI.localRange)
       updateZoomedChart()
     }, EASE.inCubic, function () {
       V.isZooming = false
       V.isZoomed = false
+      V.forceUpdate = true
       resize()
       if (V.zoomedChart) {
         V.zoomedChart.destroy()
@@ -1525,8 +1524,10 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
       wakeUp()
     })
 
-    if (!TYPES.percentage)
+    if (!TYPES.area) {
       renderCtrls(V.zoomedChart.getSeries())
+      togglePreview(V.showPreview)
+    }
     hideLegend()
   }
 
@@ -1606,7 +1607,7 @@ var Charty = function (_ID, chart, _parent, _UI, _ctx) {
         updateZoomedChart()
       }
 
-      if (TYPES.pie || (V.isZoomed && TYPES.percentage)) {
+      if (TYPES.pie || (V.isZoomed && TYPES.area)) {
         if (area === AREA.MAIN) {
           V.pieX = x - UI.main.width / 2
           V.pieY = y - UI.main.height / 2 - UI.chart.topPadding
