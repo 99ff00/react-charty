@@ -103,7 +103,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAflBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////vroaSAAAAKXRSTlMA9F4IBPHk2dK8fXYxD/z4wLSvo5yGVEdCIhvIqJiPWFA9Nykf3ctiF+A174kAAADgSURBVEjH7ZJZDoJAEAWbAREB2RRwRTaXvv8FNUyr0QTy+CXUH0kldGoezUyau+NaY/w85CDxcb+x+UV4VqC/jlhzJIxE/DTH/I34BWGk4idgJiW+s8b82tD+AozaXrUflmDQFWsuNC6QB/qu+FsaF2hlYv5OAi0PmL+3tW/UvYqZKfP7cWRN/0QfMXN8+A/k9p/gdAf7v4FOvb733kAGBlJLFlLrE8hph2YQs3BubvK3ioawChaMAFyQkkvwBVXyWPiC9pHY8IKsLcMLErygC7QjmNxmNkoagX+KMpqZGE/sxyrbXghwlwAAAABJRU5ErkJggg==');
-  transition: transform .15s ease, opacity .15s ease;
+  transition: transform .15s ease;
 }
 .chart .checkbox span.name {
   font-weight: normal;

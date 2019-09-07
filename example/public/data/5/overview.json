@@ -2586,5 +2586,6 @@
       1660
     ]
   },
+  "xAxisType": "date",
   "type": "percentage_area"
 }

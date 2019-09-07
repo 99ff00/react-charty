@@ -519,6 +519,7 @@
       140
     ]
   },
+  "xAxisType": "time",
   "type": "line",
   "stepX": 86400000
 }

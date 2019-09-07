@@ -2955,5 +2955,6 @@
       210
     ]
   },
+  "xAxisType": "date",
   "type": "stacked_bar"
 }

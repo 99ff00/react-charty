@@ -1110,5 +1110,6 @@
       35310
     ]
   },
+  "xAxisType": "date",
   "type": "multi_yaxis"
 }

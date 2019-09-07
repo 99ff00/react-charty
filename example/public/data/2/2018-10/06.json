@@ -519,6 +519,7 @@
       340
     ]
   },
+  "xAxisType": "time",
   "type": "multi_yaxis",
   "stepX": 86400000
 }

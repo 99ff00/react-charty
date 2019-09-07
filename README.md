@@ -3,7 +3,7 @@
 # react-charty [![npm version](https://img.shields.io/npm/v/react-charty.svg?style=flat)](https://www.npmjs.com/package/react-charty)
 
 This component was born during the Teleram contest where I took one of the prize places.
-Big ups to the Telegram team.
+Big ups to the Telegram team and all contestants.
 
 ### Features
 
@@ -142,7 +142,7 @@ export default class App extends Component {
 |`animated`       |Boolean      |Enables/disables animations and transitions, default value is `true`.|
 |`startX`         |Number       |The starting value for .|
 |`endX`           |Number       |The starting value for .|
-|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. |
+|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
 |`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, i
 f you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
 |`showLegend`     |Boolean      |If set to `false` the legend will not appear when moving cursor over the chart (or tapping chart area on mobile). The default value is `true`.|

@@ -1110,5 +1110,6 @@
       2590
     ]
   },
+  "xAxisType": "date",
   "type": "line"
 }

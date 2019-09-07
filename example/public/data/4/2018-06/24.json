@@ -1172,6 +1172,7 @@
     ]
   },
   "showPreview": false,
+  "xAxisType": "time",
   "type": "line",
   "stepX": 86400000
 }

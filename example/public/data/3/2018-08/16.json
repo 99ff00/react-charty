@@ -1379,6 +1379,7 @@
       10
     ]
   },
+  "xAxisType": "time",
   "type": "stacked_bar",
   "stepX": 86400000
 }

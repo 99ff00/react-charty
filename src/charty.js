@@ -62,6 +62,23 @@ var CHART = '<div id=|header>\
       if (!s) s = 1.5
       return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b
     }
+  },
+  DATA_TYPES = {
+    time: function(ts) {
+      return unixToTime(ts)
+    },
+    date: function (ts) {
+      return unixToD(ts)
+    },
+    shortDate: function(ts) {
+      return unixToD(ts)
+    },
+    longDate: function(ts) {
+      return unixToD(ts, true)
+    },
+    undefined: function(v) {
+      return v
+    }
   }
 
 function roundDate(ts) {
@@ -163,7 +180,7 @@ function querySTree(T, len, leftIdx, rightIdx, cmp, fail) {
   return querySTree_(T, leftIdx, rightIdx, 0, len - 1, 0, cmp, fail)
 }
 
-var Charty = function (ID_, chart, parent, UI_, ctx_) {
+var Charty = function (ID_, params, parent, UI_, ctx_) {
   var ID = typeof ID_ === 'object' ? ID_.id : ID_
 
   if (!ID)
@@ -172,8 +189,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
   var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = ctx_,
     IDs = [ID], AY = [], AYL, AX, AXL, X = {}, TYPES = {},
     TOTALS, PERCENTS = [], STREE_MIN = [], STREE_MAX = [], animations = {}, A = { previewA: 1 },
-    STATE = {}, myIdx = CHARTS.length,
-    currentTheme,
+    STATE = {}, myIdx = CHARTS.length, parentParams, parentSeries, currentTheme,
     UI = UI_ || {
       chart: { topPadding: 50, hPadding: 15, height: 400 },
       pie: { textColor: '#fff', segmentShift: 5 },
@@ -186,6 +202,11 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     self = this
 
   CHARTS.push(self)
+
+  if (parent) {
+    parentParams = parent.getParams();
+    parentSeries = parent.getSeries();
+  }
 
   function setTheme(theme) {
     currentTheme = theme
@@ -239,7 +260,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     else if (currentTheme)
       setTheme(currentTheme)
     else {
-      setTheme(chart.theme || {})
+      setTheme(params.theme || {})
     }
   }
 
@@ -248,13 +269,14 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     IDs.map(flerken)
   }
 
-  function renderCtrls(series) {
-    if (AYL < 2 || !V.showButtons) UI.ctrls.innerHTML = ''
+  function renderCtrls() {
+    if (!V.showButtons)
+      UI.ctrls.innerHTML = ''
     else {
       UI.ctrls.innerHTML = parse(CTRLS, [])
       IDs.map(flerken)
 
-      AY.map(function (y, i) {
+      AY.map(function (S, i) {
         UI['checkbox' + i]
           .on('mousedown touchstart', function (e) {
             stop(e)
@@ -268,7 +290,6 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
                 if (!s.off && idx !== i || s.off && idx === i)
                   toggleCheckbox(idx, idx !== i)
               }
-
               V.seriesCount = 1
               V.prevSeriesCount = 0
             }, LONG_TAP_DURATION)
@@ -285,15 +306,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
                 return toggleCheckbox(i)
             el.shake()
           })
-        var S = series[i]
-        if (S && !TYPES.bar) {
-          if (AY[i]) {
-            AY[i].off = S.off
-            A['on' + i] = S.off ? 0 : 1
-            A['alphaY' + i] = S.off ? 0 : 1
-          }
-          updateCheckbox(i, S.off)
-        }
+        updateCheckbox(i, S.off)
       })
     }
     updateTheme()
@@ -318,55 +331,58 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
   }
 
   function start() {
-    if (!chart.data)
+    if (!params.data)
       return error('The data parameter is missing.')
 
-    if (!chart.data.x || !(chart.data.x instanceof Array))
+    if (!params.data.x || !(params.data.x instanceof Array))
       return error('The x-axis data is missing.')
 
-    var type = chart.type || 'line';
+    var type = params.type || 'line';
     ['line', 'stacked', 'area', 'percentage', 'multi_yaxis', 'bar', 'pie'].forEach(function(t) {
       TYPES[t] = type.indexOf(t) >= 0
     })
 
-    TYPES.linear = TYPES.line || TYPES.multi_yaxis
-    V.showLegend = chart.showLegend !== false
-    V.showButtons = chart.showButtons !== false
-    V.showPreview = chart.showPreview !== false
-    V.stepX = chart.stepX || 1
+    Object.keys(params.data).forEach(function(n) {
+      var data = params.data[n]
 
-    Object.keys(chart.data).forEach(function(n) {
-      var data = chart.data[n]
-
-      if (n === 'x') {
+      if (n === 'x')
         AX = data
-        AXL = AX.length
-        X.min = AX[0]
-      } else
-        AY.push({ data, color: chart.colors[n], name: chart.names[n], type: chart.type })
+      else
+        AY.push({ data, color: params.colors[n], name: params.names[n], type: params.type })
     })
 
     AYL = AY.length
-
+    AXL = AX.length
+    X.min = AX[0]
     X.max = AX[AXL - 1]
     X.d = X.max - X.min
 
-    for (var i = 0; i < AYL; i++) {
-      var data = AY[i].data
+    TYPES.linear = TYPES.line || TYPES.multi_yaxis
+    V.showLegend = params.showLegend !== false
+    V.showButtons = params.showButtons !== false && AYL >= 2
+    V.showPreview = params.showPreview !== false
+    V.stepX = params.stepX || 1
+
+    for (var i = 0, S; i < AYL; i++) {
+      var S = AY[i], off = false
 
       if (!TYPES.percentage) {
-        STREE_MAX[i] = initSTree(data)
-        buildSTree(STREE_MAX[i], data, Math.max)
-        STREE_MIN[i] = initSTree(data)
-        buildSTree(STREE_MIN[i], data, Math.min)
+        STREE_MAX[i] = initSTree(S.data)
+        buildSTree(STREE_MAX[i], S.data, Math.max)
+        STREE_MIN[i] = initSTree(S.data)
+        buildSTree(STREE_MIN[i], S.data, Math.min)
       }
 
-      A['alphaY' + i] = 1
-      A['on' + i] = 1
+      if (parentSeries && parentSeries[i] && parentSeries[i].name === S.name)
+        off = parentSeries[i].off
+
+      S.off = off
+      A['alphaY' + i] = off ? 0 : 1
+      A['on' + i] = off ? 0 : 1
     }
 
-    V.localStart = chart.startX || 2 / 3 * X.d + X.min
-    V.localEnd = chart.endX || X.max
+    V.localStart = params.startX || 2 / 3 * X.d + X.min
+    V.localEnd = params.endX || X.max
     V.globalStart = X.min
     V.globalEnd = X.max
     V.minBrushSize = X.d * UI.preview.minBrushSize / 100
@@ -375,15 +391,15 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
 
     if (parent) {
       renderLegend()
-      renderCtrls(parent.getSeries())
+      renderCtrls()
       parent.togglePreview(V.showPreview)
     } else {
       byId(ID).innerHTML = parse(CHART)
       IDs.map(flerken)
       renderLegend()
-      renderCtrls(AY)
+      renderCtrls()
       togglePreview(V.showPreview)
-      UI.title.innerText = chart.title
+      UI.title.innerText = params.title
       ctx = UI.canvas.getContext('2d')
       hookEvents()
     }
@@ -412,7 +428,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       if (!a.started)
         a.started = time
 
-      if (chart.animated === false) {
+      if (params.animated === false) {
         a.update ? a.update(a.to) : A[name] = a.to
         a.cb && a.cb()
         a.off = true
@@ -578,17 +594,18 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     start -= start % stepGridX
     ctx.fillStyle = UI.xAxis.textColor
     ctx.globalAlpha = a
-    for (var i = start, x; i <= end; i += stepGridX) {
+    for (var i = start, x, u; i <= end; i += stepGridX) {
       if (!prevStep && stepGridX < V.prevStepGridX && i % V.prevStepGridX === 0) continue
       if (prevStep && stepGridX > V.prevStepGridX && i % V.prevStepGridX === 0) continue
       if (prevStep && V.stepGridX > V.prevStepGridX && i % V.stepGridX === 0) continue
       x = UI.chart.hPadding + (AX[i] - V.localStart) * scaleX
-      ctx.fillText((parent) ? unixToTime(AX[i]) : unixToD(AX[i]), x, y)
+      u = params.xAxisType instanceof Function ? params.xAxisType(AX[i]) : DATA_TYPES[params.xAxisType](AX[i])
+      ctx.fillText(u, x, y)
     }
   }
 
   function renderYText(prevStep, stepGridY, scaleY, localMin, localMax, localD, minLocalD, lowerMin, p) {
-    var y = localMin, y_, yPos, val, c = 0, a0 = TYPES.multi_yaxis ? A['alphaY0'] : 1,
+    var u, y = localMin, y_, yPos, val, c = 0, a0 = TYPES.multi_yaxis ? A['alphaY0'] : 1,
       a1 = TYPES.multi_yaxis ? A['alphaY1'] : 1,
       a = A['stepGridYA' + stepGridY], v
 
@@ -606,14 +623,16 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       if (yPos > 15) {
         ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
         ctx.fillStyle = TYPES.multi_yaxis ? AY[0].lineColor : UI.yAxis.textColor
-        ctx.fillText(val, UI.chart.hPadding, yPos - 5)
+        u = params.yAxisType instanceof Function ? params.yAxisType(val) : DATA_TYPES[params.yAxisType](val)
+        ctx.fillText(u, UI.chart.hPadding, yPos - 5)
         if (TYPES.multi_yaxis) {
           ctx.fillStyle = AY[1].lineColor || UI.yAxis.textColor
           val = Math.max(0, Math.floor(lowerMin + (y - localMin) / localD * minLocalD))
           if (c > 0 && val > 50)
             val = Math.ceil(val / 10) * 10
           ctx.globalAlpha = a * p * a1
-          ctx.fillText(val, UI.main.width - UI.chart.hPadding - ctx.measureText(val).width - 5, yPos - 5)
+          u = params.yAxisType instanceof Function ? params.yAxisType(val) : DATA_TYPES[params.yAxisType](val)
+          ctx.fillText(u, UI.main.width - UI.chart.hPadding - ctx.measureText(u).width - 5, yPos - 5)
         }
       }
       UI.canvas.line(UI.chart.hPadding, yPos, UI.main.width - UI.chart.hPadding, yPos, UI.grid.lineWidth, UI.grid.color, a * UI.grid.alpha * p)
@@ -649,7 +668,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
 
   function renderBars(type, masterA, width, height, vStart, hPadding, offsetY, offsetX, isPreview, startIdx, endIdx, scaleX) {
     var selectedIdx, x, p = 1 - V.progress,
-      barWidth = Math.round((UI.main.width) / (endIdx - startIdx)) + 1,
+      barWidth = Math.ceil((UI.main.width) / (endIdx - startIdx)) + 1,
       max = 0, alpha, scaleY, STACK = new Array(AXL),
       selectX, selectY, selectH
 
@@ -958,7 +977,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
 
   function renderGrid() {
     var showLegend = V.showLegend && !isNaN(V.vLineX)
-    showLegend && (!(TYPES.bar || TYPES.pie) || TYPES.area || !V.zoomedChart) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
+    showLegend && (!(TYPES.bar || TYPES.pie) || TYPES.area) && UI.canvas.line(V.vLineX, TYPES.area ? 16 : 4, V.vLineX, UI.main.height, UI.grid.lineWidth, UI.grid.color, UI.grid.alpha)
     if (!V.zoomedChart)
       toggleLegend(showLegend || (TYPES.area && V.isZoomed))
   }
@@ -975,7 +994,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
   }
 
   this.getParams = function () {
-    return chart
+    return params
   }
 
   function updateRangeText(el, _start, _end) {
@@ -1127,7 +1146,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
   function updateCheckbox(i, off) {
     var to = off ? 0 : 1
 
-    UI['checkbox' + i].attr('class', styles['checkbox']).stylo({ backgroundColor: off ? 'transparent' : AY[i].color})
+    UI['checkbox' + i].attr('class', styles['checkbox']).stylo({backgroundColor: off ? 'transparent' : AY[i].color})
     UI['chk' + i].stylo({ transform: 'scale(' + to + ')', opacity: to }, true)
     UI['name' + i].stylo({ transform: 'translate3d(' + ((to - 1) * 8) + 'px, 0, 0)', color: off ? AY[i].color : '#fff' })
   }
@@ -1218,8 +1237,8 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       } else {
         side = V.vLineX < UI.main.width / 2 ? 0 : 1
         x = applyRange(V.vLineX - UI.grid.legendShift - side * (UI.legend.w - 2 * UI.grid.legendShift), 2, UI.main.width - UI.legend.w - 2)
-        if (chart.legendPosition === 'top') y = UI.chart.topPadding
-        else if (chart.legendPosition === 'bottom') y = UI.xAxis.y - UI.legend.h + 40
+        if (params.legendPosition === 'top') y = UI.chart.topPadding
+        else if (params.legendPosition === 'bottom') y = UI.xAxis.y - UI.legend.h + 40
         else y = applyRange(V.vLineY - UI.legend.h - (IS_MOBILE ? 50 : 10), UI.chart.topPadding, UI.xAxis.y - UI.legend.h)
       }
       UI.legend.stylo({ opacity: 1, transform: 'translate3d(' + x + 'px, ' + y + 'px, 0)' }, true)
@@ -1260,18 +1279,23 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
         min = u
     }
 
-    for (var y = 0; y < AYL; y++) {
-      if (AY[y].off)
-        continue
+    for (var y = 0, S; y < AYL; y++) {
+      S = AY[y]
+      // if (S.off) {
+      //   S.max = 0
+      //   S.min = 0
+      //   S.d = 0
+      //   continue
+      // }
 
       if (TYPES.stacked || TYPES.bar || TYPES.percentage) {
-        AY[y].max = querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity)
-        AY[y].min = 0
-        AY[y].d = AY[y].max
+        S.max = querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity)
+        S.min = 0
+        S.d = S.max
       } else if (TYPES.multi_yaxis) {
-        AY[y].min = querySTree(STREE_MIN[y], AXL, x1, x2, Math.min, Infinity)
-        AY[y].max = querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity)
-        AY[y].d = AY[y].max - AY[y].min
+        S.min = querySTree(STREE_MIN[y], AXL, x1, x2, Math.min, Infinity)
+        S.max = querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity)
+        S.d = S.max - S.min
       } else {
         compare(querySTree(STREE_MIN[y], AXL, x1, x2, Math.min, Infinity))
         compare(querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity))
@@ -1288,7 +1312,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     return Math.max(from, Math.min(v, to))
   }
 
-  function updateZoomedChart(chart) {
+  function updateZoomedChart() {
     if (V.zoomedChart)
       V.zoomedChart.setProgress(V)
   }
@@ -1298,7 +1322,7 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
     if (!UI.legend) return
     V.vLineX = undefined
     V.highlightedX = -1
-    UI.legend.stylo({ transform: 'translate3d(0, -1000px, 0)'})
+    UI.legend.stylo({transform: 'translate3d(0, -1000px, 0)'})
     if (V.legendTimer) {
       clearTimeout(V.legendTimer)
       V.legendTimer = undefined
@@ -1465,13 +1489,13 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       hideLegend()
     }
 
-    if (!chart.onZoomIn || TYPES.pie) {
+    if (!params.onZoomIn || TYPES.pie) {
       if (TYPES.area)
         doZoom()
       return
     }
 
-    chart.onZoomIn(AX[selectedIndex]).then(function (data) {
+    params.onZoomIn(AX[selectedIndex]).then(function (data) {
       V.zoomedChart = new Charty(ID, data, self, UI, ctx)
       repaint()
       doZoom()
@@ -1525,16 +1549,27 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       wakeUp()
     })
 
-    if (!TYPES.area) {
-      renderCtrls(V.zoomedChart.getSeries())
+    if (V.zoomedChart) {
+      var series = V.zoomedChart.getSeries()
+
+      series.map(function(S, i) {
+        var off = S.off
+        if (AY[i] && (AY[i].name === S.name)) {
+          AY[i].off = off
+          A['alphaY' + i] = off ? 0 : 1
+          A['on' + i] = off ? 0 : 1
+        }
+      })
+
+      renderCtrls()
       togglePreview(V.showPreview)
     }
     hideLegend()
   }
 
-  this.setData = function (data) {
-    start(data)
-  }
+  // this.setData = function (data) {
+  //   start(data)
+  // }
 
   function wakeUp() {
     V.hidden = false
@@ -1631,36 +1666,37 @@ var Charty = function (ID_, chart, parent, UI_, ctx_) {
       }
 
       var width = V.localEnd - V.localStart,
-        newLocalStart, newLocalEnd, deltaX
+        newLocalStart, newLocalEnd, deltaX,
+        stepX = (V.zoomedChart ? V.zoomedChart.getParams().stepX : V.stepX) || 1
 
       if (STATE.draggingArea === AREA.BRUSH_LEFT) {
         newLocalStart = applyRange((x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.isZoomed ? V.globalEnd : V.localEnd - V.minBrushSize)
         deltaX = V.localStart - newLocalStart
-        if (Math.abs(deltaX) / V.stepX >= 1)
+        if (Math.abs(deltaX) / stepX >= 1)
           V.localStart = newLocalStart
         else {
-          if (Math.abs(deltaX) > V.stepX * 0.5)
-            moveBrush(V.localStart - V.stepX * Math.round(deltaX / V.stepX), V.localEnd)
+          if (Math.abs(deltaX) > stepX * 0.5)
+            moveBrush(V.localStart - stepX * Math.round(deltaX / stepX), V.localEnd)
         }
       } else if (STATE.draggingArea === AREA.BRUSH_RIGHT) {
         newLocalEnd = applyRange((x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.isZoomed ? 0 : V.localStart + V.minBrushSize, V.globalEnd)
         deltaX = V.localEnd - newLocalEnd
-        if (Math.abs(deltaX) / V.stepX >= 1)
+        if (Math.abs(deltaX) / stepX >= 1)
           V.localEnd = newLocalEnd
         else {
-          if (Math.abs(deltaX) > V.stepX * 0.5)
-            moveBrush(V.localStart, V.localEnd - V.stepX * Math.round(deltaX / V.stepX))
+          if (Math.abs(deltaX) > stepX * 0.5)
+            moveBrush(V.localStart, V.localEnd - stepX * Math.round(deltaX / stepX))
         }
       } else if (STATE.draggingArea === AREA.BRUSH_CENTER) {
         newLocalStart = applyRange((x - V.deltaDragX - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.globalEnd - width)
         newLocalEnd = applyRange(newLocalStart + width, V.globalStart, V.globalEnd)
         deltaX = V.localEnd - newLocalEnd
-        if (Math.abs(deltaX) / V.stepX >= 1) {
+        if (Math.abs(deltaX) / stepX >= 1) {
           V.localStart = newLocalStart
           V.localEnd = newLocalEnd
         } else {
-          if (Math.abs(deltaX) > V.stepX * 0.5)
-            moveBrush(V.localStart - V.stepX * Math.round(deltaX / V.stepX), V.localEnd - V.stepX * Math.round(deltaX / V.stepX))
+          if (Math.abs(deltaX) > stepX * 0.5)
+            moveBrush(V.localStart - stepX * Math.round(deltaX / stepX), V.localEnd - stepX * Math.round(deltaX / stepX))
         }
       }
     })
