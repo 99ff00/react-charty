@@ -133,19 +133,37 @@ export default class App extends Component {
 
 ### Component props
 
-| Name            | Type        |                                                                     |
+| Name            | Type        | Description                                                         |
 |-----------------|-------------|---------------------------------------------------------------------|
 |`type`           |String       |The chart type, can be one of the following values: `line`, `bar`, `percentage_area`, `stacked_bar`, `multi_yaxis`, `pie`. The default value is `line`.|
 |`data`           |Object       |Contains the data points for chart series. Every key of this object is an array of data points. The `x` array is mandatory and contains the data for x-axis while other keys represent the data points for y-axis. There could be multiple series in one chart and thus several data arrays for y-axis, for example `y`, `y0`, `y1`, `yAxis` etc. The key name can be any and is used as reference for name, color etc. The key name also defines the rendering order (alphabetically).|
 |`names`          |Object       |Contains the names for data series, referenced by key. For example, `names: { y0: 'Views', y1: 'Clicks' }`|
 |`colors`         |Object       |Contains the colors for data series, referenced by key. For example, `colors: { y0: '#4BD964', y1: '#FE3C30' }`|
+|`theme`          |Object       |Contains the colors for chart components|
 |`animated`       |Boolean      |Enables/disables animations and transitions, default value is `true`.|
-|`startX`         |Number       |The starting value for .|
-|`endX`           |Number       |The starting value for .|
-|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
-|`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, i
-f you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
+|`startX`         |Number       |The starting position of preview region. If not specified, the starting position of preview region will be at 2/3 of `x` axis.|
+|`endX`           |Number       |The ending position of preview region. If not specified, the ending position of preview region will be at the end of `x` axis.|
+|`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, if you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
 |`showLegend`     |Boolean      |If set to `false` the legend will not appear when moving cursor over the chart (or tapping chart area on mobile). The default value is `true`.|
-|`legendPosition` |Boolean      |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the popup will follow the mouse cursor position.|
+|`legendPosition` |Boolean      |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the legend popup will follow the cursor position.|
 |`showPreview`    |Boolean      |If set to `false` the chart preview won't be visible. The default value is `true`.|
 |`showButtons`    |Boolean      |If set to `false` the series buttons won't be visible. The default value is `true`.|
+|`showRangeText`  |Boolean      |Show/hide current range text in top right corner. The default value is `true`.|
+|`rangeTextType`  |String       |Defines the display type of current range. It could be one of following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
+|`xAxisType`      |String       |Defines the type of `x` axis.|
+|`yAxisType`      |String       |Defines the type of `y` axis.|
+|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
+|`zoomInterval`   |Number       |By default, when zomming the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in into one week, the interval would be `14515200000`) and chart will put the current position in the middle of this interval.|
+|`zoomStepX`      |Number       |Same as `stepX`, but for zooming chart.|
+
+### Display Data Types
+
+Currently the renderers of following data types are supported:
+
+| Type              | Descirption                                                                       |
+|-------------------|-----------------------------------------------------------------------------------|
+|`time`             |Display time in format `HH:mm`, e.g. `09:42`|
+|`date`             |Display date in format `MMM D`, e.g. `Jan 1`|
+|`shortDate`        |The same like `date`|
+|`longDate`         |Display date in format `D MMM YYYY`, e.g. `8 Jun 2003`|
+|`longDateWeekDay`  |The same like `longDate`, but prepended with week day `ddd, D MMM YYYY`, e.g. `Sun, 8 sep 2019`.|

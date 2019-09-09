@@ -18,10 +18,14 @@ export default class Charty extends Component {
     showPreview: PropTypes.bool,
     legendPosition: PropTypes.string,
     data: PropTypes.object,
+    names: PropTypes.object,
+    colors: PropTypes.object,
     stepX: PropTypes.number,
     startX: PropTypes.number,
     endX: PropTypes.number,
-    onZoomIn: PropTypes.func
+    onZoomIn: PropTypes.func,
+    zoomInterval: PropTypes.number,
+    zoomStepX: PropTypes.number
   }
 
   componentDidMount() {

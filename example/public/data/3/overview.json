@@ -2956,5 +2956,6 @@
     ]
   },
   "xAxisType": "date",
+  "rangeTextType": "longDate",
   "type": "stacked_bar"
 }

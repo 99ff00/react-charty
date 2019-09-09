@@ -520,6 +520,7 @@
     ]
   },
   "xAxisType": "time",
+  "rangeTextType": "longDateWeekDay",
   "type": "line",
   "stepX": 86400000
 }

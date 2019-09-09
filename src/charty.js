@@ -10,7 +10,7 @@
 
 import styles from './styles.css'
 
-var CHART = '<div id=|header>\
+var CHARTY = '<div id=|header>\
       <h3 id=|title></h3>\
       <h3 id=|zoom><span id=|zoomIcon></span><span id=|zoomText>Zoom Out</span></h3>\
       <h4 id=|localRange></h4>\
@@ -39,6 +39,7 @@ var CHART = '<div id=|header>\
   AREA = { HEADER: 1, MAIN: 2, XAXIS: 3, PREVIEW: 4, BRUSH_CENTER: 5, BRUSH_LEFT: 6, BRUSH_RIGHT: 7 },
   IS_MOBILE = window.orientation !== undefined,
   CHARTS = [],
+  ONE_HOUR = 60 * 60 * 1000,
   ONE_DAY = 86400000,
   PIE_VISIBLE = 0.99,
   SHARED_PROPS = ['globalStart', 'globalEnd', 'localStart', 'localEnd', 'vLineX', 'vLineY', 'legendIsVisible', 'isZoomed', 'isZooming'],
@@ -74,7 +75,10 @@ var CHART = '<div id=|header>\
       return unixToD(ts)
     },
     longDate: function(ts) {
-      return unixToD(ts, true)
+      return unixToDate(ts)
+    },
+    longDateWeekDay: function (ts) {
+      return unixToD(ts, true, true)
     },
     undefined: function(v) {
       return v
@@ -204,8 +208,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   CHARTS.push(self)
 
   if (parent) {
-    parentParams = parent.getParams();
-    parentSeries = parent.getSeries();
+    parentParams = parent.getParams()
+    parentSeries = parent.getSeries()
   }
 
   function setTheme(theme) {
@@ -359,8 +363,9 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
     TYPES.linear = TYPES.line || TYPES.multi_yaxis
     V.showLegend = params.showLegend !== false
-    V.showButtons = params.showButtons !== false && AYL >= 2
+    V.showButtons = params.showButtons !== false && AYL > 1
     V.showPreview = params.showPreview !== false
+    V.showRangeText = params.showRangeText !== false
     V.stepX = params.stepX || 1
 
     for (var i = 0, S; i < AYL; i++) {
@@ -394,7 +399,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       renderCtrls()
       parent.togglePreview(V.showPreview)
     } else {
-      byId(ID).innerHTML = parse(CHART)
+      byId(ID).innerHTML = parse(CHARTY)
       IDs.map(flerken)
       renderLegend()
       renderCtrls()
@@ -989,6 +994,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   }
 
   this.repaint = repaint
+
   this.getSeries = function () {
     return AY
   }
@@ -997,10 +1003,28 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     return params
   }
 
+  this.getAxesData = function () {
+    return { AX: AX, AY: AY, X: X }
+  }
+
   function updateRangeText(el, _start, _end) {
-    var start = _start || V.localStart,
-      end = _end || V.localEnd
-    el.innerText = Math.abs(start - end) / ONE_DAY < 2 ? unixToD(start, true, true) : unixToDate(start) + ' - ' + unixToDate(end - 0.01 * ONE_DAY)
+    if (!V.showRangeText || V.isZooming)
+      return
+
+    var start = _start === undefined ? V.localStart : _start,
+      end = (_end === undefined ? V.localEnd : _end) - V.stepX,
+      rangeText, rangeTextType = V.zoomedChart ? V.zoomedChart.getParams().rangeTextType : params.rangeTextType
+
+    if (rangeTextType instanceof Function) {
+      rangeText = rangeTextType(start, end)
+    } else if (rangeText === undefined) {
+      var startStr = DATA_TYPES[rangeTextType](start),
+        endStr = DATA_TYPES[rangeTextType](end)
+
+      rangeText = startStr === endStr ? startStr : startStr + ' - ' + endStr
+    }
+
+    el.innerText = rangeText
   }
 
   function recalcTotals() {
@@ -1440,15 +1464,10 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   this.hide = hide
 
   function zoomIn(x) {
-    var selectedX = V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
-      selectedIndex = applyRange(Math.round((AXL - 1) * (selectedX - X.min) / X.d), 0, AXL - 1),
-      date = AX[selectedIndex],
-      selectedDate = applyRange(roundDate(date), X.min, X.max - ONE_DAY),
+    var selectedX = Math.round(V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart)),
+      selectedIndex = xToIndex(x),
       currentGlobalStart = V.globalStart, currentGlobalEnd = V.globalEnd,
       currentLocalStart = V.localStart, currentLocalEnd = V.localEnd
-
-    V.zoomStart = applyRange(selectedDate - 3 * ONE_DAY, X.min, X.max - 7 * ONE_DAY)
-    V.zoomEnd = applyRange(V.zoomStart + 7 * ONE_DAY, X.min, X.max)
 
     V._globalStart = V.globalStart
     V._globalEnd = V.globalEnd
@@ -1456,26 +1475,51 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     V._localEnd = V.localEnd
 
     function doZoom() {
-      var d = ZOOM_IN_DURATION
-      if (TYPES.area)
-        d *= 2
+      var newGlobalStart, newGlobalEnd, newLocalStart, newLocalEnd, zoomInterval, stepX
+
+      if (V.zoomedChart) {
+        var data = V.zoomedChart.getAxesData(),
+          zoomParams = V.zoomedChart.getParams()
+
+        stepX = zoomParams.stepX || V.zoomStepX || V.stepX
+        zoomInterval = params.zoomInterval || zoomParams.zoomInterval
+        if (zoomInterval) {
+          newGlobalStart = selectedX - zoomInterval / 2
+          newGlobalEnd = newGlobalStart + zoomInterval
+          newLocalStart = selectedX
+          newLocalEnd = newLocalStart + stepX
+        } else {
+          newGlobalStart = data.X.min
+          newGlobalEnd = data.X.max
+          newLocalStart = zoomParams.startX || newGlobalStart + Math.floor(data.X.d / 2 / stepX) * stepX
+          newLocalEnd = newLocalStart + stepX
+        }
+      } else {
+        stepX = V.zoomStepX || V.stepX
+        zoomInterval = params.zoomInterval || 7 * stepX
+        newGlobalStart = AX[selectedIndex] - 3 * stepX
+        newGlobalEnd = newGlobalStart + zoomInterval
+        newLocalStart = AX[selectedIndex]
+        newLocalEnd = newLocalStart + stepX
+      }
+
+      updateRangeText(UI.zoomedRange, newLocalStart, newLocalEnd)
       V.isZooming = true
 
-      animate('zoomIn', 0, 1, d, function (v) {
+      animate('zoomIn', 0, 1, TYPES.area ? 2 * ZOOM_IN_DURATION : ZOOM_IN_DURATION, function (v) {
         var p = Math.min(1, v), p_ = (1 - p)
 
         V.progress = v
-        V.globalStart = currentGlobalStart - p * (currentGlobalStart - V.zoomStart)
-        V.globalEnd = currentGlobalEnd - p * (currentGlobalEnd - V.zoomEnd)
-        V.localStart = currentLocalStart - p * (currentLocalStart - selectedDate)
-        V.localEnd = currentLocalEnd - p * (currentLocalEnd - (selectedDate + ONE_DAY))
+        V.globalStart = currentGlobalStart - p * (currentGlobalStart - newGlobalStart)
+        V.globalEnd = currentGlobalEnd - p * (currentGlobalEnd - newGlobalEnd)
+        V.localStart = currentLocalStart - p * (currentLocalStart - newLocalStart)
+        V.localEnd = currentLocalEnd - p * (currentLocalEnd - newLocalEnd)
 
         UI.title.stylo({ opacity: p_, transform: 'scale(' + p_ + ', ' + p_ + ')' }, true)
         UI.zoom.stylo({ opacity: p, transform: 'scale(' + p + ', ' + p + ')' }, true)
         UI.localRange.stylo({ opacity: p_, transform: 'scale(' + p_ + ', ' + p_ + ')' }, true)
         UI.zoomedRange.stylo({ opacity: p, transform: 'scale(' + p + ', ' + p + ')' }, true)
 
-        updateRangeText(UI.zoomedRange)
         updateZoomedChart()
       }, TYPES.area ? EASE.outBack : EASE.outCubic, function () {
         V.isZooming = false
@@ -1485,6 +1529,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         if (V.zoomedChart)
           V.zoomedChart.wakeUp()
       })
+
       V.selectedIndex = selectedIndex
       hideLegend()
     }
@@ -1497,8 +1542,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
     params.onZoomIn(AX[selectedIndex]).then(function (data) {
       V.zoomedChart = new Charty(ID, data, self, UI, ctx)
-      repaint()
       doZoom()
+      repaint()
     }, function (err) {
         error('Error loading data: ' + JSON.stringify(err) + '\n\nx: ' + AX[selectedIndex])
     })
