@@ -25,7 +25,10 @@ export default class Charty extends Component {
     endX: PropTypes.number,
     onZoomIn: PropTypes.func,
     zoomInterval: PropTypes.number,
-    zoomStepX: PropTypes.number
+    zoomStepX: PropTypes.number,
+    autoScale: PropTypes.bool,
+    minY: PropTypes.number,
+    maxY: PropTypes.number
   }
 
   componentDidMount() {

@@ -143,18 +143,21 @@ export default class App extends Component {
 |`animated`       |Boolean      |Enables/disables animations and transitions, default value is `true`.|
 |`startX`         |Number       |The starting position of preview region. If not specified, the starting position of preview region will be at 2/3 of `x` axis.|
 |`endX`           |Number       |The ending position of preview region. If not specified, the ending position of preview region will be at the end of `x` axis.|
-|`stepX`          |Number       |The value to increase / decrease current X axis position when dragging or moving the chart preview region. For example, if you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
+|`stepX`          |Number       |The value to increase / decrease current `x` axis position when dragging or moving the chart preview region. For example, if you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
 |`showLegend`     |Boolean      |If set to `false` the legend will not appear when moving cursor over the chart (or tapping chart area on mobile). The default value is `true`.|
 |`legendPosition` |Boolean      |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the legend popup will follow the cursor position.|
 |`showPreview`    |Boolean      |If set to `false` the chart preview won't be visible. The default value is `true`.|
 |`showButtons`    |Boolean      |If set to `false` the series buttons won't be visible. The default value is `true`.|
 |`showRangeText`  |Boolean      |Show/hide current range text in top right corner. The default value is `true`.|
-|`rangeTextType`  |String       |Defines the display type of current range. It could be one of following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
+|`rangeTextType`  |String       |Defines the display type of current range. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
 |`xAxisType`      |String       |Defines the type of `x` axis.|
 |`yAxisType`      |String       |Defines the type of `y` axis.|
 |`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
 |`zoomInterval`   |Number       |By default, when zomming the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in into one week, the interval would be `604800000`) and chart will put the current position in the middle of this interval.|
 |`zoomStepX`      |Number       |Same as `stepX`, but for zooming chart.|
+|`autoScale`      |Boolean      |Automatically finds the min/max `y` values and scales the chart accordingly. If this prop is set to `false`, the min/max values can be set with `minY` and `maxY` props. The default value is `true`.|
+|`minY`           |Number       |Set the minimum value for `y` axis. This property is ignored if `autoScale` is set to `true`.|
+|`maxY`           |Number       |Set the maximum value for `y` axis. This property is ignored if `autoScale` is set to `true`.|
 
 ### Display Data Types
 
