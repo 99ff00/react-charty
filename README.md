@@ -152,7 +152,7 @@ export default class App extends Component {
 |`rangeTextType`  |String       |Defines the display type of current range. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
 |`xAxisType`      |String       |Defines the type of `x` axis.|
 |`yAxisType`      |String       |Defines the type of `y` axis.|
-|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
+|`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It should accept the clicked `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
 |`zoomInterval`   |Number       |By default, when zomming the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in into one week, the interval would be `604800000`) and chart will put the current position in the middle of this interval.|
 |`zoomStepX`      |Number       |Same as `stepX`, but for zooming chart.|
 |`autoScale`      |Boolean      |Automatically finds the min/max `y` values and scales the chart accordingly. If this prop is set to `false`, the min/max values can be set with `minY` and `maxY` props. The default value is `true`.|
@@ -163,7 +163,7 @@ export default class App extends Component {
 
 Currently the renderers of following data types are supported:
 
-| Type              | Descirption                                                                       |
+| Type              | Description                                                                       |
 |-------------------|-----------------------------------------------------------------------------------|
 |`time`             |Display time in format `HH:mm`, e.g. `09:42`|
 |`date`             |Display date in format `MMM D`, e.g. `Jan 1`|

@@ -1260,6 +1260,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         V.isOnOffAnimating = false
         V.forceUpdate = true
       })
+      A['alphaY' + i] = 1
     } else {
       animate('alphaY' + i, from, to, ON_OFF_DURATION)
     }
@@ -1494,7 +1495,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
   function zoomIn(x) {
     var selectedX = V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
-      selectedIndex = applyRange(Math.round((AXL - 1) * (selectedX - X.min) / X.d), 0, AXL - 1),
+      selectedIndex = xToIdx(selectedX),
       currentGlobalStart = V.globalStart,
       currentGlobalEnd = V.globalEnd,
       currentLocalStart = V.localStart,
