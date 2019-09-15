@@ -10,7 +10,7 @@ Please check the [Demo App](https://99ff00.github.io/react-charty/).
 
 ### Features
 
-- Small footprint (it's just 14KB minified and gzipped)
+- Small footprint (it's just 12KB minified and gzipped)
 - The following charts are supported: line, multi_yaxis line, stacked bars, percentage, pie
 - Supports thousands of records (thanks to the fast Segment Tree algorithm)
 - A wide variety of supported browsers on different platforms (including mobiles)
@@ -19,6 +19,7 @@ Please check the [Demo App](https://99ff00.github.io/react-charty/).
 - Zoom-in support
 - No dependencies, the core is Vanilla JS
 - Can be used as a standalone library without React
+- Different chart types can be combined
 
 ### Browsers support
 
@@ -139,11 +140,12 @@ Currently the following data types are supported. If no data type is specified t
 
 | Type              | Description                                                                       |
 |-------------------|-----------------------------------------------------------------------------------|
-|`float1`           |Float value with 1 decimal place|
-|`float2`           |Float value with 2 decimal places|
 |`number`           |Integer value with housands separator, e.g. `9 189 141`|
 |`time`             |Display time in format `HH:mm`, e.g. `09:42`|
 |`date`             |Display date in format `MMM D`, e.g. `Jan 1`|
 |`shortDate`        |Same like `date`|
 |`longDate`         |Display date in format `D MMM YYYY`, e.g. `8 Jun 2003`|
-|`longDateWeekDay`  |Same like `longDate`, but prepended with week day `ddd, D MMM YYYY`, e.g. `Sun, 8 sep 2019`.|
+|`longDateWeekDay`  |Same like `longDate`, but prepended with week day `ddd, D MMM YYYY`, e.g. `Sun, 8 sep 2019`|
+|`float1`           |Float value with 1 decimal place|
+|`float2`           |Float value with 2 decimal places|
+
