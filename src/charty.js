@@ -1519,6 +1519,11 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
   this.hide = hide
 
   function zoomIn(x) {
+    if (V.inProgress)
+      return
+
+    V.inProgress = true
+
     var selectedX = V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
       selectedIndex = xToIdx(selectedX),
       currentGlobalStart = V.globalStart,
@@ -1589,6 +1594,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       }, TYPES.area ? EASE.outBack : EASE.outCubic, function () {
         V.isZooming = false
         V.isZoomed = true
+        V.inProgress = false
         V.forceUpdate = true
         resize()
         if (V.zoomedChart)
@@ -1601,7 +1607,9 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
     if (!props.onZoomIn || TYPES.pie) {
       if (TYPES.area)
-        doZoom()
+        return doZoom()
+
+      V.inProgress = false
       return
     }
 
@@ -1610,7 +1618,8 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       doZoom()
       repaint()
     }, function (err) {
-        error('Error loading data: ' + JSON.stringify(err) + '\n\nx: ' + AX[selectedIndex])
+      V.inProgress = false
+      error('Error loading data: ' + JSON.stringify(err) + '\n\nx: ' + AX[selectedIndex])
     })
   }
 
