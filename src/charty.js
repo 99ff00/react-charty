@@ -191,7 +191,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   var V = { progress: 0, needMeasure: true, yPos: [] }, ctx = ctx_,
     IDs = [ID], AY = [], AYL, AX, AXL, X = {}, TYPES = {},
     TOTALS, PERCENTS = [], STREE_MIN = [], STREE_MAX = [], animations = {}, A = { previewA: 1 },
-    STATE = {}, myIdx = CHARTS.length, parentParams, parentSeries, currentTheme,
+    STATE = {}, myIdx = CHARTS.length, parentSeries, currentTheme,
     UI = UI_ || {
       chart: { topPadding: 50, hPadding: 15, height: 400 },
       pie: { textColor: '#fff', segmentShift: 5 },
@@ -205,10 +205,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
   CHARTS.push(self)
 
-  if (parent) {
-    parentParams = parent.getParams()
+  if (parent)
     parentSeries = parent.getSeries()
-  }
 
   function setTheme(theme) {
     currentTheme = theme
@@ -751,7 +749,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(xToIndex(V.localStart), xToIndex(V.localEnd), masterA)
+        renderPie(xToIndex(V.localStart, true), xToIndex(V.localEnd), masterA)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -1654,6 +1652,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   function moveBrush(newLocalStart, newLocalEnd) {
     if (V.movingBrush) return
     if (newLocalStart === V.localStart && newLocalEnd === V.localEnd) return
+    if (newLocalStart >= newLocalEnd || newLocalEnd <= newLocalStart) return
     V.movingBrush = true
     var start = V.localStart, end = V.localEnd
     animate('snapX', 0, 1, SNAP_DURATION, function (p) {
@@ -1719,6 +1718,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
       if (area >= AREA.XAXIS)
         hideLegend()
+
       repaint()
 
       if (!IS_MOBILE || STATE.draggingArea >= AREA.PREVIEW)
@@ -1727,41 +1727,50 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       updateCursor(area)
 
       var width = V.localEnd - V.localStart,
-        newLocalStart, newLocalEnd, deltaX,
-        stepX = (V.zoomedChart ? V.zoomedChart.getParams().stepX : V.stepX) || 1
+        newLocalStart, newLocalEnd, deltaX, xVal, deltaStepX,
+        stepX = (V.zoomedChart ? V.zoomedChart.getParams().stepX : V.stepX) || 1,
+        minBrushSize = (V.isZoomed || TYPES.pie) ? stepX : Math.max(stepX, V.minBrushSize)
 
-      if (V.isZoomed && V.zoomStepX)
-        stepX = V.zoomStepX
+      if (V.isZoomed && params.zoomStepX)
+        stepX = params.zoomStepX
 
       if (STATE.draggingArea === AREA.BRUSH_LEFT) {
-        newLocalStart = applyRange((x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.isZoomed ? (V.globalEnd - stepX) : V.localEnd - V.minBrushSize)
+        xVal = (x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart
+        newLocalStart = applyRange(xVal, V.globalStart, V.localEnd - minBrushSize)
         deltaX = V.localStart - newLocalStart
-        if (Math.abs(deltaX) / stepX >= 1)
+        if (!TYPES.pie && stepX === 1 && Math.abs(deltaX) / stepX >= 1) {
           V.localStart = newLocalStart
-        else {
+        } else {
           if (Math.abs(deltaX) > stepX * 0.5) {
-            moveBrush(V.localStart - stepX * Math.round(deltaX / stepX), V.localEnd)
+            deltaStepX = stepX * Math.ceil(deltaX / stepX)
+            moveBrush(V.localStart - deltaStepX, V.localEnd)
           }
         }
       } else if (STATE.draggingArea === AREA.BRUSH_RIGHT) {
-        newLocalEnd = applyRange((x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.isZoomed ? (V.globalStart + stepX) : V.localStart + V.minBrushSize, V.globalEnd)
+        xVal = (x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart
+        newLocalEnd = applyRange(xVal, V.localStart + minBrushSize, V.globalEnd)
         deltaX = V.localEnd - newLocalEnd
-        if (Math.abs(deltaX) / stepX >= 1)
+        if (!TYPES.pie && stepX === 1 && Math.abs(deltaX) / stepX >= 1)
           V.localEnd = newLocalEnd
         else {
-          if (Math.abs(deltaX) > stepX * 0.5)
-            moveBrush(V.localStart, V.localEnd - stepX * Math.round(deltaX / stepX))
+          if (Math.abs(deltaX) > stepX * 0.5) {
+            deltaStepX = stepX * Math.floor(deltaX / stepX)
+            moveBrush(V.localStart, V.localEnd - deltaStepX)
+          }
         }
       } else if (STATE.draggingArea === AREA.BRUSH_CENTER) {
-        newLocalStart = applyRange((x - V.deltaDragX - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.globalEnd - width)
+        xVal = (x - V.deltaDragX - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart
+        newLocalStart = applyRange(xVal, V.globalStart, V.globalEnd - width)
         newLocalEnd = applyRange(newLocalStart + width, V.globalStart, V.globalEnd)
         deltaX = V.localEnd - newLocalEnd
-        if (Math.abs(deltaX) / stepX >= 1) {
+        if (!TYPES.pie && stepX === 1 && Math.abs(deltaX) / stepX >= 1) {
           V.localStart = newLocalStart
           V.localEnd = newLocalEnd
         } else {
-          if (Math.abs(deltaX) > stepX * 0.5)
-            moveBrush(V.localStart - stepX * Math.round(deltaX / stepX), V.localEnd - stepX * Math.round(deltaX / stepX))
+          if (Math.abs(deltaX) > stepX * 0.5) {
+            deltaStepX = stepX * Math.round(deltaX / stepX)
+            moveBrush(V.localStart - deltaStepX, V.localEnd - deltaStepX)
+          }
         }
       }
     })

@@ -133,8 +133,8 @@ export default class App extends Component {
       <React.Fragment>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
         <div className="container">
-          {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
-          <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
+          <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
+          {/* <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
           <Charty title="Messages" theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
           <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} /> */}
           <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
