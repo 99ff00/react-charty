@@ -254,6 +254,9 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
   }
 
   this.setTheme = setTheme
+  this.getDefaultTheme = function() {
+    return DEFAULT_THEME
+  }
 
   start()
 

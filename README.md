@@ -68,7 +68,7 @@ const MINIMAL_EXAMPLE_DATA = {
 export default class App extends Component {
   render () {
     return (
-      <Charty title="Temperature" theme={theme} style={style} {...MINIMAL_EXAMPLE_DATA} />
+      <Charty title="Temperature" {...MINIMAL_EXAMPLE_DATA} />
     )
   }
 }
@@ -76,7 +76,7 @@ export default class App extends Component {
 
 ### Theming
 
-The chart controls can be customized via `theme` prop. Here's an example of two theme objects. The `LIGHT_THEME` is hardcoded in chart component and used if no theme is provided.
+The chart controls can be customized via `theme` prop. Here's an example of two themes. The `LIGHT_THEME` is hardcoded in chart component and used if no theme is provided.
 For theme switching example please check the [Demo App](https://99ff00.github.io/react-charty/). Also, please check [styles.css](./src/styles.css) for even more customization.
 
 ```jsx static
