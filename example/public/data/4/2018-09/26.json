@@ -1172,6 +1172,7 @@
     ]
   },
   "showPreview": false,
+  "yAxisType": "number",
   "xAxisType": "time",
   "rangeTextType": "longDateWeekDay",
   "type": "line",

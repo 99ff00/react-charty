@@ -1110,6 +1110,7 @@
       2590
     ]
   },
+  "yAxisType": "number",
   "xAxisType": "date",
   "rangeTextType": "longDate",
   "type": "line"

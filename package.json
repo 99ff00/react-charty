@@ -1,7 +1,7 @@
 {
   "name": "react-charty",
   "version": "0.1.1",
-  "description": "Data visualization component for your website",
+  "description": "To visualize your precious data",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",

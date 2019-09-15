@@ -519,6 +519,7 @@
       1170
     ]
   },
+  "yAxisType": "number",
   "xAxisType": "time",
   "rangeTextType": "longDateWeekDay",
   "type": "multi_yaxis",

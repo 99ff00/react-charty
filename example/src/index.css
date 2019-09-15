@@ -20,6 +20,12 @@ h3 {
   cursor: pointer;
   margin: 20px;
 }
+h4.note {
+  font-size: 14px;
+  color: #108BE399;
+  text-align: center;
+  font-weight: 100;
+}
 .container {
   display: flex;
   flex-direction: row;

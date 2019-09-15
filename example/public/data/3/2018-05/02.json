@@ -1315,6 +1315,7 @@
       0
     ]
   },
+  "yAxisType": "number",
   "xAxisType": "time",
   "rangeTextType": "longDateWeekDay",
   "type": "stacked_bar",

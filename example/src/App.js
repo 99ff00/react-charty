@@ -72,7 +72,7 @@ const LIGHT_THEME = {
       y11: '#C8C8A9',
       y12: '#2373DB'
     }
-  };
+  }
 
 export default class App extends Component {
   constructor(props) {
@@ -132,6 +132,7 @@ export default class App extends Component {
     return (
       <React.Fragment>
         <h3 onClick={this.switchTheme}>Switch theme</h3>
+        <h4 className="note">(click on the chart to zoom in)</h4>
         <div className="container">
           <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
           <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />

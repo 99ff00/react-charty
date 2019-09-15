@@ -23,6 +23,16 @@ var CHARTY = '<div id=|header>\
   LEGEND = '<div id=|date><span id=|xval></span></div>\
       [<div id=|label{i}><div id=|labelPercent{i}></div><div id=|labelName{i}></div><div id=|labelValue{i} style="color:{color}"></div></div>]\
       <div id=|labelTotal><div id=|labelNameTotal>All</div><div id=|labelValueTotal></div></div>',
+  DEFAULT_THEME = {
+    grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff' },
+    legend: { background: '#fff', color: '#000' },
+    preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1' },
+    xAxis: { textColor: '#8E8E93', textAlpha: 1 },
+    yAxis: { textColor: '#8E8E93', textAlpha: 1 },
+    title: { color: '#000' },
+    localRange: { color: '#000' },
+    zoomedRange: { color: '#000' }
+  },
   PI_RAD = Math.PI / 180,
   FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
   WDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -63,20 +73,29 @@ var CHARTY = '<div id=|header>\
     }
   },
   DATA_TYPES = {
-    time: function(ts) {
-      return unixToTime(ts)
+    time: function(v) {
+      return unixToTime(v)
     },
-    date: function (ts) {
-      return unixToD(ts)
+    date: function (v) {
+      return unixToD(v)
     },
-    shortDate: function(ts) {
-      return unixToD(ts)
+    shortDate: function(v) {
+      return unixToD(v)
     },
-    longDate: function(ts) {
-      return unixToDate(ts)
+    longDate: function(v) {
+      return unixToDate(v)
     },
-    longDateWeekDay: function (ts) {
-      return unixToD(ts, true, true)
+    longDateWeekDay: function (v) {
+      return unixToD(v, true, true)
+    },
+    float1: function (v) {
+      return parseFloat(v).toFixed(1)
+    },
+    float2: function (v) {
+      return parseFloat(v).toFixed(2)
+    },
+    number: function (v) {
+      return format(v)
     },
     undefined: function(v) {
       return Math.round(v)
@@ -199,7 +218,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       grid: { lineWidth: 1, legendShift: -10, markerRadius: 3, markerLineWidth: 4 },
       xAxis: { textWidth: 80, height: 32, fadeTime: 250 },
       yAxis: { textCount: 5, fadeTime: 500 },
-      main: { lineWidth: 2 }
+      main: { lineWidth: 2, vPadding: 15 }
     },
     self = this
 
@@ -260,7 +279,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     else if (currentTheme)
       setTheme(currentTheme)
     else {
-      setTheme(props.theme || {})
+      setTheme(props.theme || DEFAULT_THEME)
     }
   }
 
@@ -330,11 +349,12 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     throw msg
   }
 
-  function start() {
-    if (!props.data)
+  function start(data_) {
+    var data = props.data || data_
+    if (!data)
       return error('The data parameter is missing.')
 
-    if (!props.data.x || !(props.data.x instanceof Array))
+    if (!data.x || !(data.x instanceof Array))
       return error('The x-axis data is missing.')
 
     var type = props.type || 'line';
@@ -342,13 +362,13 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       TYPES[t] = type.indexOf(t) >= 0
     })
 
-    Object.keys(props.data).forEach(function(n) {
-      var data = props.data[n]
+    Object.keys(data).forEach(function(n) {
+      var d = data[n]
 
       if (n === 'x')
-        AX = data
+        AX = d
       else
-        AY.push({ data, color: props.colors[n], name: props.names[n], type: props.type })
+        AY.push({ data: d, color: (props.colors || {})[n], name: (props.names || {})[n], type: props.type })
     })
 
     AYL = AY.length
@@ -362,6 +382,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     V.showButtons = props.showButtons !== false && AYL > 1
     V.showPreview = props.showPreview !== false
     V.showRangeText = props.showRangeText !== false
+    V.showLegendTitle = props.showLegendTitle !== false
     V.stepX = props.stepX || 1
     V.zoomStepX = props.zoomStepX || 1
     V.autoScale = props.autoScale !== false
@@ -551,7 +572,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       start = xToIdxDown(V.localStart - UI.chart.hPadding / scaleX),
       end = xToIdxUp(V.localEnd + UI.chart.hPadding / scaleX),
       y = UI.xAxis.y + UI.xAxis.height / 2,
-      stepGridX = Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
+      stepGridX = props.xAxisStep ? props.xAxisStep : Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
       stepGridY = Math.round(localD / UI.yAxis.textCount) || 1,
       d = 5 * Math.pow(10, (stepGridY.toString().length - 2)) || 1
 
@@ -950,7 +971,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
   function renderMain() {
     ctx.lineWidth = UI.main.lineWidth
-    renderSeries('local', TYPES.percentage ? 1 : 1 - V.progress, UI.preview.width, UI.main.height - 22, V.localStart, V.localEnd, UI.chart.hPadding, UI.main.height, false)
+    renderSeries('local', TYPES.percentage ? 1 : 1 - V.progress, UI.preview.width, UI.main.height - 1.5 * UI.main.vPadding, V.localStart, V.localEnd, UI.chart.hPadding, UI.main.height, false)
     renderGrid()
   }
 
@@ -1193,9 +1214,6 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       renderMain()
       renderPreview()
       renderAxis()
-
-      // ctx.globalAlpha = .5
-      // UI.canvas.rect(0, UI.main.y, UI.main.width, UI.main.height)
     }
     STATE.repaint = false
     V.forceUpdate = false
@@ -1284,9 +1302,13 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         idx = pieMode ? V.selectedIndex : (TYPES.bar ? xToIdxDown(x) : xToIdx(x)),
         scaleX = UI.preview.width / (V.localEnd - V.localStart),
         dy = TYPES.linear ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
-        scaleY = (UI.main.height - 15 - dy) / A.localDY, side = 1, sum = 0
+        scaleY = (UI.main.height - UI.main.vPadding - dy) / A.localDY, side = 1, sum = 0
 
-      UI.xval.innerText = V.isZoomed ? unixToTime(AX[idx]) : unixToD(AX[idx], true)
+      if (V.showLegendTitle)
+        UI.xval.innerText = DATA_TYPES[props.xAxisType](AX[idx])
+      else
+        UI.xval.stylo({ display: 'none' })
+
       V.highlightedX = V.vLineX
 
       ctx.fillStyle = UI.grid.markerFillColor
@@ -1301,7 +1323,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         if (S.off) continue
         sum += v
         if (TYPES.multi_yaxis)
-          scaleY = (UI.main.height - 15 - dy) / A['localDY' + s]
+          scaleY = (UI.main.height - UI.main.vPadding - dy) / A['localDY' + s]
         UI['labelName' + s].innerText = S.name
         UI['labelValue' + s].innerText = format(v)
         if (TYPES.percentage || TYPES.pie) {
@@ -1652,9 +1674,9 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     hideLegend()
   }
 
-  // this.setData = function (data) {
-  //   start(data)
-  // }
+  this.setData = function (data) {
+    start(data)
+  }
 
   function wakeUp() {
     V.hidden = false

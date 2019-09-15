@@ -516,6 +516,7 @@
       70
     ]
   },
+  "yAxisType": "number",
   "xAxisType": "time",
   "rangeTextType": "longDateWeekDay",
   "type": "line",
