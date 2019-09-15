@@ -6,6 +6,8 @@ This component was born from the [Teleram](https://telegram.org/) programming co
 Below you will find the instructions how to use and customize this component. I hope you will find it useful to visualize your precious data.
 Big ups to the Telegram team and all contestants.
 
+Please check the [Demo App](https://99ff00.github.io/react-charty/).
+
 ### Features
 
 - Small footprint (it's just 14KB minified and gzipped)
@@ -37,7 +39,7 @@ yarn add react-charty
 
 Here's an example how to get a really basic chart like the one on this screenshot below. For more complex examples please check the [Demo App](https://99ff00.github.io/react-charty/).
 
-<img src="./assets/example1.png" title="Minimal Example" />
+<img src="./assets/example1.png" title="Minimal Example" width="500" />
 
 ```jsx static
 import React, { Component } from 'react'
