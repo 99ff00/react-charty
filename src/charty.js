@@ -410,10 +410,18 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     render()
   }
 
-  function xToIndex(v, low) {
-    var i = (AXL - 1) * (v - X.min) / X.d
-    return applyRange(low ? Math.floor(i) : Math.ceil(i), 0, AXL - 1)
+  function xToIdx(x) {
+    return applyRange(Math.round((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1)
   }
+
+  function xToIdxUp(x) {
+    return applyRange(Math.ceil((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1)
+  }
+
+  function xToIdxDown(x) {
+    return applyRange(Math.floor((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1)
+  }
+
   function xToPreview(v) {
     return (v - V.globalStart) / (V.globalEnd - V.globalStart) * UI.preview.width + UI.chart.hPadding
   }
@@ -538,9 +546,9 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     var
       w = UI.main.width - 2 * UI.chart.hPadding,
       scaleX = w / (V.localEnd - V.localStart),
-      scaleY = UI.main.height / localD,
-      start = xToIndex(V.localStart - UI.chart.hPadding / scaleX, true),
-      end = xToIndex(V.localEnd + UI.chart.hPadding / scaleX),
+      scaleY = (UI.main.height - 22) / localD,
+      start = xToIdxDown(V.localStart - UI.chart.hPadding / scaleX),
+      end = xToIdxUp(V.localEnd + UI.chart.hPadding / scaleX),
       y = UI.xAxis.y + UI.xAxis.height / 2,
       stepGridX = Math.pow(2, Math.ceil(Math.log(3 * UI.xAxis.textWidth * (end - start) / w))) || 1,
       stepGridY = Math.round(localD / UI.yAxis.textCount) || 1,
@@ -622,21 +630,20 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       }
       val = '' + Math.floor(c === 0 ? localMin : y_)
 
-      if (yPos > 15) {
-        ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
-        ctx.fillStyle = TYPES.multi_yaxis ? AY[0].lineColor : UI.yAxis.textColor
+      ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
+      ctx.fillStyle = TYPES.multi_yaxis ? AY[0].lineColor : UI.yAxis.textColor
+      u = params.yAxisType instanceof Function ? params.yAxisType(val) : DATA_TYPES[params.yAxisType](val)
+      ctx.fillText(u, UI.chart.hPadding, yPos - 5)
+      if (TYPES.multi_yaxis) {
+        ctx.fillStyle = AY[1].lineColor || UI.yAxis.textColor
+        val = Math.max(0, Math.floor(lowerMin + (y - localMin) / localD * minLocalD))
+        if (c > 0 && val > 50)
+          val = Math.ceil(val / 10) * 10
+        ctx.globalAlpha = a * p * a1
         u = params.yAxisType instanceof Function ? params.yAxisType(val) : DATA_TYPES[params.yAxisType](val)
-        ctx.fillText(u, UI.chart.hPadding, yPos - 5)
-        if (TYPES.multi_yaxis) {
-          ctx.fillStyle = AY[1].lineColor || UI.yAxis.textColor
-          val = Math.max(0, Math.floor(lowerMin + (y - localMin) / localD * minLocalD))
-          if (c > 0 && val > 50)
-            val = Math.ceil(val / 10) * 10
-          ctx.globalAlpha = a * p * a1
-          u = params.yAxisType instanceof Function ? params.yAxisType(val) : DATA_TYPES[params.yAxisType](val)
-          ctx.fillText(u, UI.main.width - UI.chart.hPadding - ctx.measureText(u).width - 5, yPos - 5)
-        }
+        ctx.fillText(u, UI.main.width - UI.chart.hPadding - ctx.measureText(u).width - 5, yPos - 5)
       }
+
       UI.canvas.line(UI.chart.hPadding, yPos, UI.main.width - UI.chart.hPadding, yPos, UI.grid.lineWidth, UI.grid.color, a * UI.grid.alpha * p)
       if (!prevStep)
         V.yPos[c] = yPos
@@ -681,7 +688,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
     if (V.showLegend && V.vLineX >= 0) {
       x = V.localStart + (V.highlightedX - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart)
-      selectedIdx = xToIndex(x, true)
+      selectedIdx = xToIdxDown(x)
     }
 
     for (var s = 0; s < AYL; s++) {
@@ -713,8 +720,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
   function renderArea(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview) {
     var scaleX = width / (vEnd - vStart),
-      startIdx = xToIndex(vStart - hPadding / scaleX, true),
-      endIdx = xToIndex(vEnd + hPadding / scaleX),
+      startIdx = xToIdxDown(vStart - hPadding / scaleX),
+      endIdx = xToIdxUp(vEnd + hPadding / scaleX),
       STACK = new Array(AXL),
       progress = isPreview ? 0 : V.progress,
       R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
@@ -725,8 +732,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       vStart = V._localStart
       vEnd = V._localEnd
       scaleX = width / (vEnd - vStart)
-      startIdx = xToIndex(vStart - hPadding / scaleX, true)
-      endIdx = xToIndex(vEnd + hPadding / scaleX)
+      startIdx = xToIdxDown(vStart - hPadding / scaleX)
+      endIdx = xToIdxUp(vEnd + hPadding / scaleX)
     }
 
     if (!isPreview)
@@ -749,7 +756,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(xToIndex(V.localStart, true), xToIndex(V.localEnd), masterA)
+        renderPie(xToIdxDown(V.localStart), xToIdxUp(V.localEnd), masterA)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -925,8 +932,8 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
   function renderSeries(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview) {
     var scaleX = width / (vEnd - vStart),
-      startIdx = xToIndex(vStart - hPadding / scaleX, true),
-      endIdx = xToIndex(vEnd + hPadding / scaleX),
+      startIdx = xToIdxDown(vStart - hPadding / scaleX),
+      endIdx = xToIdxUp(vEnd + hPadding / scaleX),
       scaleY
 
     ctx.globalAlpha = masterA
@@ -942,7 +949,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
   function renderMain() {
     ctx.lineWidth = UI.main.lineWidth
-    renderSeries('local', TYPES.percentage ? 1 : 1 - V.progress, UI.preview.width, UI.main.height, V.localStart, V.localEnd, UI.chart.hPadding, UI.main.height, false)
+    renderSeries('local', TYPES.percentage ? 1 : 1 - V.progress, UI.preview.width, UI.main.height - 15, V.localStart, V.localEnd, UI.chart.hPadding, UI.main.height, false)
     renderGrid()
   }
 
@@ -1102,10 +1109,10 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         recalcTotals()
     } else {
       if (seriesCountChanged || isZoomed || V.forceUpdate)
-        recalcMinMax('global', xToIndex(V.globalStart), xToIndex(V.globalEnd))
+        recalcMinMax('global', xToIdxUp(V.globalStart), xToIdxUp(V.globalEnd))
 
       if (localRangeChanged || seriesCountChanged || isZoomed || V.forceUpdate)
-        recalcMinMax('local', xToIndex(V.localStart), xToIndex(V.localEnd))
+        recalcMinMax('local', xToIdxUp(V.localStart), xToIdxUp(V.localEnd))
     }
 
     if (localRangeChanged || isZoomed || V.forceUpdate)
@@ -1210,10 +1217,10 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
     if (on) {
       var y, p, x = V.localStart + (V.vLineX - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
-        idx = pieMode ? V.selectedIndex : applyRange(Math.round((AXL - 1) * (x - X.min) / X.d), 0, AXL - 1),
+        idx = pieMode ? V.selectedIndex : (TYPES.bar ? xToIdxDown(x) : xToIdx(x)),
         scaleX = UI.preview.width / (V.localEnd - V.localStart),
         dy = TYPES.linear ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
-        scaleY = (UI.main.height - dy) / A.localDY, side = 1, sum = 0
+        scaleY = (UI.main.height - 15 - dy) / A.localDY, side = 1, sum = 0
 
       UI.xval.innerText = V.isZoomed ? unixToTime(AX[idx]) : unixToD(AX[idx], true)
       V.highlightedX = V.vLineX
@@ -1230,7 +1237,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         if (S.off) continue
         sum += v
         if (TYPES.multi_yaxis)
-          scaleY = (UI.main.height - dy) / A['localDY' + s]
+          scaleY = (UI.main.height - 15 - dy) / A['localDY' + s]
         UI['labelName' + s].innerText = S.name
         UI['labelValue' + s].innerText = format(v)
         if (TYPES.percentage || TYPES.pie) {
@@ -1240,7 +1247,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
           pp += p
           UI['labelPercent' + s].stylo({ display: pieMode ? 'none' : 'flex' }).innerText = Math.round(p * 100) + '%'
         }
-        if (!(TYPES.bar || TYPES.percentage)) {
+        if (!(TYPES.pie || TYPES.bar || TYPES.percentage)) {
           ctx.strokeStyle = S.color
           ctx.beginPath()
           ctx.arc(UI.chart.hPadding + (AX[idx] - V.localStart) * scaleX, UI.xAxis.y - (S.data[idx] - A['localMinY' + (TYPES.multi_yaxis ? s : '')]) * scaleY, UI.grid.markerRadius, 0, Math.PI * 2)
@@ -1305,12 +1312,12 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
 
     for (var y = 0, S; y < AYL; y++) {
       S = AY[y]
-      // if (S.off) {
-      //   S.max = 0
-      //   S.min = 0
-      //   S.d = 0
-      //   continue
-      // }
+      if (S.off) {
+        S.max = 0
+        S.min = 0
+        S.d = 0
+        continue
+      }
 
       if (TYPES.stacked || TYPES.bar || TYPES.percentage) {
         S.max = querySTree(STREE_MAX[y], AXL, x1, x2, Math.max, -Infinity)
