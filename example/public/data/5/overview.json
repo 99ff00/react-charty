@@ -2586,7 +2586,8 @@
       1660
     ]
   },
-  "zoomInterval": 14515200000,
+  "zoomInterval": 604800000,
+  "zoomStepX": 86400000,
   "xAxisType": "date",
   "rangeTextType": "longDate",
   "type": "percentage_area"

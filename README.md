@@ -153,7 +153,7 @@ export default class App extends Component {
 |`xAxisType`      |String       |Defines the type of `x` axis.|
 |`yAxisType`      |String       |Defines the type of `y` axis.|
 |`onZoomIn`       |Function     |This callback is called when some point is clicked on chart. It accepts the current `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
-|`zoomInterval`   |Number       |By default, when zomming the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in into one week, the interval would be `14515200000`) and chart will put the current position in the middle of this interval.|
+|`zoomInterval`   |Number       |By default, when zomming the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in into one week, the interval would be `604800000`) and chart will put the current position in the middle of this interval.|
 |`zoomStepX`      |Number       |Same as `stepX`, but for zooming chart.|
 
 ### Display Data Types

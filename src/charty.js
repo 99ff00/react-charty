@@ -39,8 +39,6 @@ var CHARTY = '<div id=|header>\
   AREA = { HEADER: 1, MAIN: 2, XAXIS: 3, PREVIEW: 4, BRUSH_CENTER: 5, BRUSH_LEFT: 6, BRUSH_RIGHT: 7 },
   IS_MOBILE = window.orientation !== undefined,
   CHARTS = [],
-  ONE_HOUR = 60 * 60 * 1000,
-  ONE_DAY = 86400000,
   PIE_VISIBLE = 0.99,
   SHARED_PROPS = ['globalStart', 'globalEnd', 'localStart', 'localEnd', 'vLineX', 'vLineY', 'legendIsVisible', 'isZoomed', 'isZooming'],
   EASE = {
@@ -81,7 +79,7 @@ var CHARTY = '<div id=|header>\
       return unixToD(ts, true, true)
     },
     undefined: function(v) {
-      return v
+      return Math.round(v)
     }
   }
 
@@ -367,6 +365,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     V.showPreview = params.showPreview !== false
     V.showRangeText = params.showRangeText !== false
     V.stepX = params.stepX || 1
+    V.zoomStepX = params.zoomStepX || 1
 
     for (var i = 0, S; i < AYL; i++) {
       var S = AY[i], off = false
@@ -471,7 +470,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     ctx.globalAlpha = a
     ctx.lineWidth = 1
 
-    if ((TYPES.bar || TYPES.area)) {
+    if ((TYPES.bar || TYPES.area || TYPES.pie)) {
       ctx.fillStyle = UI.preview.brushBorderColor
       ctx.globalAlpha = UI.preview.brushBorderAlpha
       UI.canvas.rect(start - 1, UI.preview.y - 1, hw + 3, UI.preview.height + 3, UI.preview.radius + 1, true)
@@ -752,7 +751,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(V.selectedIndex, V.selectedIndex, masterA)
+        renderPie(xToIndex(V.localStart), xToIndex(V.localEnd), masterA)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -1012,8 +1011,11 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       return
 
     var start = _start === undefined ? V.localStart : _start,
-      end = (_end === undefined ? V.localEnd : _end) - V.stepX,
+      end = _end === undefined ? V.localEnd : _end,
       rangeText, rangeTextType = V.zoomedChart ? V.zoomedChart.getParams().rangeTextType : params.rangeTextType
+
+    if (params.xAxisType === 'date')
+      end -= V.stepX
 
     if (rangeTextType instanceof Function) {
       rangeText = rangeTextType(start, end)
@@ -1464,10 +1466,16 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
   this.hide = hide
 
   function zoomIn(x) {
-    var selectedX = Math.round(V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart)),
-      selectedIndex = xToIndex(x),
-      currentGlobalStart = V.globalStart, currentGlobalEnd = V.globalEnd,
-      currentLocalStart = V.localStart, currentLocalEnd = V.localEnd
+    var selectedX = V.localStart + (x - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
+      selectedIndex = applyRange(Math.round((AXL - 1) * (selectedX - X.min) / X.d), 0, AXL - 1),
+      currentGlobalStart = V.globalStart,
+      currentGlobalEnd = V.globalEnd,
+      currentLocalStart = V.localStart,
+      currentLocalEnd = V.localEnd,
+      xVal = AX[selectedIndex]
+
+    if (params.xAxisType === 'date')
+      roundDate(xVal)
 
     V._globalStart = V.globalStart
     V._globalEnd = V.globalEnd
@@ -1497,10 +1505,14 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       } else {
         stepX = V.zoomStepX || V.stepX
         zoomInterval = params.zoomInterval || 7 * stepX
-        newGlobalStart = AX[selectedIndex] - 3 * stepX
-        newGlobalEnd = newGlobalStart + zoomInterval
-        newLocalStart = AX[selectedIndex]
+        newLocalStart = params.startX || xVal
+        if (newLocalStart + stepX >= X.max)
+          newLocalStart -= stepX
         newLocalEnd = newLocalStart + stepX
+        newGlobalStart = applyRange(xVal - (zoomInterval - stepX) / 2, X.min, X.max)
+        newGlobalEnd = applyRange(newGlobalStart + zoomInterval, X.min, X.max)
+        if (newGlobalEnd - newGlobalStart)
+          newGlobalStart = applyRange(newGlobalEnd - zoomInterval, X.min, X.max)
       }
 
       updateRangeText(UI.zoomedRange, newLocalStart, newLocalEnd)
@@ -1656,6 +1668,16 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
     updateZoomedChart()
   }
 
+  function updateCursor(area) {
+    if (!IS_MOBILE && !STATE.draggingArea) {
+      if (area === AREA.BRUSH_LEFT || area === AREA.BRUSH_RIGHT)
+        UI.canvas.stylo({ cursor: 'ew-resize' })
+      else if (area === AREA.BRUSH_CENTER)
+        UI.canvas.stylo({ cursor: 'move' })
+      else resetCursor()
+    }
+  }
+
   function hookEvents() {
     document.addEventListener('mousemove', dismiss)
     window.addEventListener('resize', resize)
@@ -1702,29 +1724,27 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       if (!IS_MOBILE || STATE.draggingArea >= AREA.PREVIEW)
         stop(e)
 
-      if (!IS_MOBILE && !STATE.draggingArea) {
-        if (area === AREA.BRUSH_LEFT || area === AREA.BRUSH_RIGHT)
-          UI.canvas.stylo({ cursor: 'ew-resize' })
-        else if (area === AREA.BRUSH_CENTER)
-          UI.canvas.stylo({ cursor: 'move' })
-        else resetCursor()
-      }
+      updateCursor(area)
 
       var width = V.localEnd - V.localStart,
         newLocalStart, newLocalEnd, deltaX,
         stepX = (V.zoomedChart ? V.zoomedChart.getParams().stepX : V.stepX) || 1
 
+      if (V.isZoomed && V.zoomStepX)
+        stepX = V.zoomStepX
+
       if (STATE.draggingArea === AREA.BRUSH_LEFT) {
-        newLocalStart = applyRange((x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.isZoomed ? V.globalEnd : V.localEnd - V.minBrushSize)
+        newLocalStart = applyRange((x - UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.globalStart, V.isZoomed ? (V.globalEnd - stepX) : V.localEnd - V.minBrushSize)
         deltaX = V.localStart - newLocalStart
         if (Math.abs(deltaX) / stepX >= 1)
           V.localStart = newLocalStart
         else {
-          if (Math.abs(deltaX) > stepX * 0.5)
+          if (Math.abs(deltaX) > stepX * 0.5) {
             moveBrush(V.localStart - stepX * Math.round(deltaX / stepX), V.localEnd)
+          }
         }
       } else if (STATE.draggingArea === AREA.BRUSH_RIGHT) {
-        newLocalEnd = applyRange((x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.isZoomed ? 0 : V.localStart + V.minBrushSize, V.globalEnd)
+        newLocalEnd = applyRange((x + UI.preview.handleW / 2 - UI.chart.hPadding) / UI.preview.width * (V.globalEnd - V.globalStart) + V.globalStart, V.isZoomed ? (V.globalStart + stepX) : V.localStart + V.minBrushSize, V.globalEnd)
         deltaX = V.localEnd - newLocalEnd
         if (Math.abs(deltaX) / stepX >= 1)
           V.localEnd = newLocalEnd
@@ -1764,6 +1784,7 @@ var Charty = function (ID_, params, parent, UI_, ctx_) {
       if (!IS_MOBILE && !isNaN(V.vLineX) && !V.zoomedChart)
         zoomIn(V.vLineX)
       STATE.draggingArea = 0
+      updateCursor(area)
     })
   }
 }
