@@ -762,7 +762,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     }
 
     if (!isPreview)
-      height += 15
+      height += UI.main.vPadding
 
     var _height = height / (1 + progress),
       scaleY = _height / 100, angle = 0,
@@ -1045,10 +1045,11 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
     var start = _start === undefined ? V.localStart : _start,
       end = _end === undefined ? V.localEnd : _end,
-      rangeText, rangeTextType = V.zoomedChart ? V.zoomedChart.getProps().rangeTextType : props.rangeTextType
+      rangeText, zoomedProps = V.zoomedChart ? V.zoomedChart.getProps() : undefined,
+      rangeTextType = zoomedProps ? zoomedProps.rangeTextType : props.rangeTextType
 
     if (props.xAxisType === 'date')
-      end -= (V.zoomStepX || V.stepX)
+      end -= (zoomedProps ? zoomedProps.zoomStepX || zoomedProps.stepX || 1 : props.zoomStepX || V.stepX)
 
     if (rangeTextType instanceof Function) {
       rangeText = rangeTextType(start, end)
@@ -1165,7 +1166,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     } else {
       prevMM = V[name + 'MM']
 
-      if (!prevMM) {
+      if (!prevMM || V.movingBrush) {
         A[name + 'MinY'] = MM.min
         A[name + 'DY'] = MM.d
       } else {

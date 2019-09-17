@@ -134,10 +134,10 @@ export default class App extends Component {
         <h3 onClick={this.switchTheme}>Switch theme</h3>
         <h4 className="note">(click on the {IS_MOBILE ? 'legend' : 'chart'} to zoom in)</h4>
         <div className="container">
-          {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
+          <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
           <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
           <Charty title="Messages" theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
-          <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} /> */}
+          <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
           <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
           <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>
