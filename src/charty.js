@@ -762,7 +762,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
     }
 
     if (!isPreview)
-      height -= 12
+      height += 15
 
     var _height = height / (1 + progress),
       scaleY = _height / 100, angle = 0,
@@ -781,7 +781,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(xToIdxDown(V.localStart), xToIdxUp(V.localEnd), masterA)
+        renderPie(xToIdx(V.localStart), xToIdx(V.localEnd - V.zoomStepX), masterA)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -852,7 +852,9 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
   function renderPieLegend(p, R, masterA) {
     for (var s = AYL - 1, tp = 0; s >= 0; s--) {
       var S = AY[s], r = R / 1.25,
-        text = Math.round((s === 0 ? 1 - tp : S.percent) * 100) + '%'
+        val = Math.round((s === 0 ? 1 - tp : S.percent) * 100),
+        text = val + '%'
+
       ctx.font = 14 + S.percent * 30 + 'px ' + FONT
       var ts = ctx.measureText(text)
       tp += S.percent
@@ -915,6 +917,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       S.angle = angle + a / 2
       S.percent = alpha * percent
       S.alpha = alpha
+      S.val = values[s]
       S.dx = dx
       S.dy = dy
       S.z = z
@@ -957,8 +960,8 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
   function renderSeries(type, masterA, width, height, vStart, vEnd, hPadding, offsetY, offsetX, isPreview) {
     var scaleX = width / (vEnd - vStart),
-      startIdx = xToIdxDown(vStart - hPadding / scaleX),
-      endIdx = xToIdxUp(vEnd + hPadding / scaleX),
+      startIdx = xToIdx(vStart - hPadding / scaleX),
+      endIdx = xToIdx(vEnd + hPadding / scaleX),
       scaleY
 
     ctx.globalAlpha = masterA
@@ -1045,7 +1048,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       rangeText, rangeTextType = V.zoomedChart ? V.zoomedChart.getProps().rangeTextType : props.rangeTextType
 
     if (props.xAxisType === 'date')
-      end -= V.stepX
+      end -= (V.zoomStepX || V.stepX)
 
     if (rangeTextType instanceof Function) {
       rangeText = rangeTextType(start, end)
@@ -1302,14 +1305,15 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
     if (on) {
       var y, p, x = V.localStart + (V.vLineX - UI.chart.hPadding) / UI.preview.width * (V.localEnd - V.localStart),
-        idx = pieMode ? V.selectedIndex : (TYPES.bar ? xToIdxDown(x) : xToIdx(x)),
+        idx = TYPES.bar ? xToIdxDown(x) : xToIdx(x),
         scaleX = UI.preview.width / (V.localEnd - V.localStart),
         dy = TYPES.linear ? UI.grid.markerRadius + UI.grid.markerLineWidth : 0,
         scaleY = (UI.main.height - UI.main.vPadding - dy) / A.localDY, side = 1, sum = 0
 
-      if (V.showLegendTitle)
+      if (V.showLegendTitle) {
         UI.xval.innerText = DATA_TYPES[props.xAxisType](AX[idx])
-      else
+        UI.xval.stylo({ display: 'block' })
+      } else
         UI.xval.stylo({ display: 'none' })
 
       V.highlightedX = V.vLineX
@@ -1321,7 +1325,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       UI.date.stylo({ display: pieMode ? 'none' : 'flex' })
 
       for (var s = 0, pp = 0; s < AYL; s++) {
-        var S = AY[s], v = S.data[idx]
+        var S = AY[s], v = pieMode ? S.val : S.data[idx]
         UI['label' + s].stylo({ display: S.off || (pieMode && s !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
         if (S.off) continue
         sum += v

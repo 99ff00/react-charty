@@ -11,7 +11,7 @@ Please check the [Demo App](https://99ff00.github.io/react-charty/).
 ### Features
 
 - Small footprint (it's just 12KB minified and gzipped)
-- The following charts are supported: line, multi_yaxis line, stacked bars, percentage, pie
+- The following chart types are supported: line, multi_yaxis line, stacked bars, percentage, pie
 - Supports thousands of records (thanks to the fast Segment Tree algorithm)
 - A wide variety of supported browsers on different platforms (including mobiles)
 - Theme support

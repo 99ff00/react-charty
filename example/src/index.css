@@ -19,12 +19,14 @@ h3 {
   text-align: center;
   cursor: pointer;
   margin: 20px;
+  margin-bottom: 10px;
 }
 h4.note {
   font-size: 14px;
   color: #108BE399;
   text-align: center;
   font-weight: 100;
+  margin: 0;
 }
 .container {
   display: flex;
