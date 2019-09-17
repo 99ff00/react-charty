@@ -749,7 +749,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
       endIdx = xToIdxUp(vEnd + hPadding / scaleX),
       STACK = new Array(AXL),
       progress = isPreview ? 0 : V.progress,
-      R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
+      R = Math.min(UI.main.height, UI.main.width) / 2 - 25,
       p = Math.min(1, progress),
       _p = (1 - progress)
 
@@ -770,18 +770,18 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
     if (!isPreview) {
       offsetX -= UI.main.width / 2
-      offsetY -= R
+      offsetY -= (R + 15)
 
       ctx.save()
       if (p < 1)
-        UI.canvas.rect(p * (UI.main.width / 2 - R), 10 * p, 2 * R * p + (1 - p) * (UI.main.width - hPadding), 2 * R + 20 * _p, p * R, true, true, true)
+        UI.canvas.rect(p * (UI.main.width / 2 - R), 25 * p, 2 * R * p + (1 - p) * (UI.main.width - hPadding), 2 * R + 50 * _p, p * R, true, true, true)
 
       ctx.translate(UI.main.width / 2, UI.main.height / 2)
       if (!isPreview && p <= PIE_VISIBLE)
         ctx.transform(1 + p, 0, 0, 1 + p, 0, 0)
 
       if (p > PIE_VISIBLE)
-        renderPie(xToIdx(V.localStart), xToIdx(V.localEnd - V.zoomStepX), masterA)
+        renderPie(xToIdx(V.localStart), xToIdx(V.localEnd - V.zoomStepX), masterA, R)
     }
 
     if (p <= PIE_VISIBLE || isPreview) {
@@ -850,24 +850,29 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
   }
 
   function renderPieLegend(p, R, masterA) {
-    for (var s = AYL - 1, tp = 0; s >= 0; s--) {
-      var S = AY[s], r = R / 1.25,
-        val = Math.round((s === 0 ? 1 - tp : S.percent) * 100),
-        text = val + '%'
+    for (var s = AYL - 1; s >= 0; s--) {
+      var S = AY[s], val = Math.round(S.percent * 100)
 
-      ctx.font = 14 + S.percent * 30 + 'px ' + FONT
-      var ts = ctx.measureText(text)
-      tp += S.percent
       if (S.off)
         continue
+
+      var fontSize = 13 + S.percent * 30,
+        r = val < 4 ? R + fontSize + 2 : R / 1.25,
+        text = val < 1 ? '<1%' : val + '%'
+
+      ctx.font = fontSize + 'px ' + FONT
+      var ts = ctx.measureText(text),
+        x = UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx,
+        y = UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + fontSize / 4 + 2 * S.dy
+
       ctx.globalAlpha = p * S.alpha * masterA
-      ctx.fillStyle = UI.pie.textColor
-      ctx.fillText(text, UI.main.width / 2 + (1 - S.percent) * r * Math.cos(S.angle) - ts.width / 2 + 2 * S.dx, UI.main.height / 2 + (1 - S.percent) * r * Math.sin(S.angle) + 2 + 2 * S.dy)
+      ctx.fillStyle = val < 4 ? S.color : UI.pie.textColor
+      ctx.fillText(text, x, y)
     }
   }
 
-  function renderPie(startIdx, endIdx, masterA) {
-    var R = Math.min(UI.main.height, UI.main.width) / 2 - 10,
+  function renderPie(startIdx, endIdx, masterA, R_) {
+    var R = R_ || Math.min(UI.main.height, UI.main.width) / 2 - 25,
       values = new Array(AYL), totals = 0,
       angle = 90 * PI_RAD, segment,
       progress = TYPES.pie ? 1 : V.progress
@@ -907,11 +912,12 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         startA = angle - 90 * PI_RAD,
         dx = z * UI.pie.segmentShift * Math.cos(90 * PI_RAD + startA + a / 2),
         dy = z * UI.pie.segmentShift * Math.sin(90 * PI_RAD + startA + a / 2),
-        dr = z * UI.pie.segmentShift
+        dr = z * UI.pie.segmentShift,
+        val = Math.round(percent * 100)
 
       PERCENTS[s] = percent
 
-      if (sectorR <= R && sectorA >= startA && sectorA < startA + a)
+      if (val >= 1 && sectorR <= R && sectorA >= startA && sectorA < startA + a)
         segment = s
 
       S.angle = angle + a / 2
@@ -935,16 +941,15 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
         d = dr / (360 - 180 * percent)
         ctx.arc(dx, dy, R + dr, angle + d, angle + a + PI_RAD * alpha - d)
       }
-      angle += a
       ctx.fill()
+      angle += a
     }
 
     if (!isNaN(segment)) {
       if (V.segment !== segment) {
         animate('pieZoom' + segment, 0, 1, ON_OFF_DURATION)
-        if (!isNaN(V.segment)) {
+        if (!isNaN(V.segment))
           animate('pieZoom' + V.segment, 1, 0, ON_OFF_DURATION, 0)
-        }
         V.segment = segment
       }
     } else if (!isNaN(V.segment)) {
