@@ -702,7 +702,7 @@ var Charty = function (ID_, props, parent, UI_, ctx_) {
 
   function renderBars(type, masterA, width, height, vStart, hPadding, offsetY, offsetX, isPreview, startIdx, endIdx, scaleX) {
     var selectedIdx, x, p = 1 - V.progress,
-      barWidth = Math.ceil((UI.main.width) / (endIdx - startIdx)) + 1,
+      barWidth = UI.main.width / (endIdx - startIdx - 0.5),
       max = 0, alpha, scaleY, STACK = new Array(AXL),
       selectX, selectY, selectH
 
