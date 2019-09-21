@@ -850,8 +850,7 @@ var Charty = (function() {
       }
       if (!isPreview) {
         ctx.restore()
-        if (p > PIE_VISIBLE)
-          renderPieLegend(p, R, masterA)
+        renderPieLegend(p, R, masterA)
       }
     }
 
@@ -1823,7 +1822,7 @@ var Charty = (function() {
           } else {
             if (Math.abs(deltaX) > stepX * 0.5) {
               deltaStepX = stepX * Math.ceil(deltaX / stepX)
-              moveBrush(V.localStart - deltaStepX, V.localEnd)
+              moveBrush(V.localStart - deltaStepX, Math.min(V.localEnd, V.globalEnd))
             }
           }
         } else if (STATE.draggingArea === AREA.BRUSH_RIGHT) {
@@ -1835,7 +1834,7 @@ var Charty = (function() {
           else {
             if (Math.abs(deltaX) > stepX * 0.5) {
               deltaStepX = stepX * Math.floor(deltaX / stepX)
-              moveBrush(V.localStart, V.localEnd - deltaStepX)
+              moveBrush(Math.max(V.globalStart, V.localStart), V.localEnd - deltaStepX)
             }
           }
         } else if (STATE.draggingArea === AREA.BRUSH_CENTER) {
