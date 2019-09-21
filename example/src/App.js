@@ -59,14 +59,14 @@ const LIGHT_THEME = {
       y1: '#EC2049',
       y2: '#F26B38',
       y3: '#F7DB4F',
-      y4: '#2F9599',
+      y4: '#A7226E',
       y5: '#474747',
       y6: '#FC9D9A',
       y7: '#FF4E50',
       y8: '#5FB641',
       y10: '#FC913A',
       y11: '#C8C8A9',
-      y12: '#A7226E'
+      y12: '#2F9599'
     }
   }
 
@@ -130,14 +130,14 @@ export default class App extends Component {
         <h3 onClick={this.switchTheme}>Switch theme</h3>
         <h4 className="note">(click on the {IS_MOBILE ? 'legend' : 'chart'} to zoom in)</h4>
         <div className="container">
-          {/* <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
+          <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
           <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
           <Charty title="Messages" theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
-    <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />*/}
+          <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
           <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
           <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>
-        <h3 onClick={this.switchTheme}>Switch theme</h3>
+        <h3 className="bottom" onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>
     )
   }

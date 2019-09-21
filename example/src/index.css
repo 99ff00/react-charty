@@ -21,11 +21,14 @@ h3 {
   margin: 20px;
   margin-bottom: 10px;
 }
+h3.bottom {
+  margin-bottom: 30px;
+}
 h4.note {
   font-size: 14px;
   color: #108BE399;
   text-align: center;
-  font-weight: 100;
+  font-weight: 500;
   margin: 0;
 }
 .container {
