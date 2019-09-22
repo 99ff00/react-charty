@@ -12,7 +12,7 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "tac ./src/charty.js | sed 1,2d | tac | sed 1,12d | terser -c -m -o ./dist/charty.min.js ; rollup -c",
+    "build": "cp ./src/styles.css ./dist/charty.css ; tac ./src/charty.js | sed 1,2d | tac | sed 1,12d | terser -c -m -o ./dist/charty.min.js ; rollup -c",
     "start": "rollup -c -w",
     "prepare": "npm run build",
     "predeploy": "cd example && npm install && npm run build",
@@ -43,7 +43,6 @@
     "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "@svgr/rollup": "^2.4.1",
     "babel-core": "^6.26.3",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.7.0",
@@ -67,6 +66,7 @@
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-peer-deps-external": "^2.2.0",
     "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-terser": "^5.1.2",
     "rollup-plugin-url": "^1.4.0",
     "terser": "^4.2.0"
   },
