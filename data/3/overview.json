@@ -2955,5 +2955,8 @@
       210
     ]
   },
+  "yAxisType": "number",
+  "xAxisType": "date",
+  "rangeTextType": "longDate",
   "type": "stacked_bar"
 }

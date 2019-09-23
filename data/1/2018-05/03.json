@@ -519,5 +519,9 @@
       10
     ]
   },
-  "type": "line"
+  "yAxisType": "number",
+  "xAxisType": "time",
+  "rangeTextType": "longDateWeekDay",
+  "type": "line",
+  "stepX": 86400000
 }

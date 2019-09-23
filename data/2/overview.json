@@ -1110,5 +1110,8 @@
       35310
     ]
   },
+  "yAxisType": "number",
+  "xAxisType": "date",
+  "rangeTextType": "longDate",
   "type": "multi_yaxis"
 }

@@ -1379,5 +1379,9 @@
       0
     ]
   },
-  "type": "stacked_bar"
+  "yAxisType": "number",
+  "xAxisType": "time",
+  "rangeTextType": "longDateWeekDay",
+  "type": "stacked_bar",
+  "stepX": 86400000
 }
