@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" vector-effect="non-scaling-stroke" class="charty">
+<style>
+    /* <![CDATA[ */
+    .charty {
+        width: 128px;
+        height: 128px;
+    }
+
+    .arc {
+        -webkit-transform-origin: 50% 50%;
+        -ms-transform-origin: 50% 50%;
+        transform-origin: 50% 50%;
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+        -webkit-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+        stroke: none;
+        stroke-width: 0;
+    }
+
+    .arc1 {
+        -webkit-animation-name: a1;
+        animation-name: a1;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    .arc2 {
+        -webkit-animation-name: a1;
+        animation-name: a2;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    .arc3 {
+        -webkit-animation-name: a1;
+        animation-name: a3;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    .arc4 {
+        -webkit-animation-name: a1;
+        animation-name: a4;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    .arc5 {
+        -webkit-animation-name: a1;
+        animation-name: a5;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    .arc6 {
+        -webkit-animation-name: a1;
+        animation-name: a6;
+        -webkit-animation-duration: 5s;
+        animation-duration: 5s;
+    }
+
+    @keyframes a1 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 110deg);
+            -ms-transform: rotate3d(0, 0, 1, 110deg);
+            transform: rotate3d(0, 0, 1, 110deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 110deg);
+            -ms-transform: rotate3d(0, 0, 1, 110deg);
+            transform: rotate3d(0, 0, 1, 110deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 210deg);
+            -ms-transform: rotate3d(0, 0, 1, 210deg);
+            transform: rotate3d(0, 0, 1, 210deg);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    @keyframes a2 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 138deg);
+            -ms-transform: rotate3d(0, 0, 1, 138deg);
+            transform: rotate3d(0, 0, 1, 138deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 138deg);
+            -ms-transform: rotate3d(0, 0, 1, 138deg);
+            transform: rotate3d(0, 0, 1, 138deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 240deg);
+            -ms-transform: rotate3d(0, 0, 1, 240deg);
+            transform: rotate3d(0, 0, 1, 240deg);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    @keyframes a3 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 145deg);
+            -ms-transform: rotate3d(0, 0, 1, 145deg);
+            transform: rotate3d(0, 0, 1, 145deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 145deg);
+            -ms-transform: rotate3d(0, 0, 1, 145deg);
+            transform: rotate3d(0, 0, 1, 145deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 250deg);
+            -ms-transform: rotate3d(0, 0, 1, 250deg);
+            transform: rotate3d(0, 0, 1, 250deg);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    @keyframes a4 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 130deg);
+            -ms-transform: rotate3d(0, 0, 1, 130deg);
+            transform: rotate3d(0, 0, 1, 130deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 130deg);
+            -ms-transform: rotate3d(0, 0, 1, 130deg);
+            transform: rotate3d(0, 0, 1, 130deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 250deg);
+            -ms-transform: rotate3d(0, 0, 1, 250deg);
+            transform: rotate3d(0, 0, 1, 250deg);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    @keyframes a5 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 120deg);
+            -ms-transform: rotate3d(0, 0, 1, 120deg);
+            transform: rotate3d(0, 0, 1, 120deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 120deg);
+            -ms-transform: rotate3d(0, 0, 1, 120deg);
+            transform: rotate3d(0, 0, 1, 120deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 250deg);
+            -ms-transform: rotate3d(0, 0, 1, 250deg);
+            transform: rotate3d(0, 0, 1, 250deg);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    @keyframes a6 {
+        25% {
+            -webkit-transform: rotate3d(0, 0, 1, 140deg);
+            -ms-transform: rotate3d(0, 0, 1, 140deg);
+            transform: rotate3d(0, 0, 1, 140deg);
+        }
+        30% {
+            -webkit-transform: rotate3d(0, 0, 1, 140deg);
+            -ms-transform: rotate3d(0, 0, 1, 140deg);
+            transform: rotate3d(0, 0, 1, 140deg);
+        }
+        75% {
+            -webkit-transform: rotate3d(0, 0, 1, 250deg) scale(1.05, 1.05);
+            -ms-transform: rotate3d(0, 0, 1, 250deg) scale(1.05, 1.05);
+            transform: rotate3d(0, 0, 1, 250deg) scale(1.05, 1.05);
+        }
+        100% {
+            -webkit-transform: rotate3d(0, 0, 1, 360deg);
+            -ms-transform: rotate3d(0, 0, 1, 360deg);
+            transform: rotate3d(0, 0, 1, 360deg);
+        }
+    }
+
+    /* ]]> */
+    </style>
+    <path d="M32 32 L62 32 A30 30 0 0 1 32 62 z" fill="#e27763" class="arc arc1" />
+    <path d="M32 32 L47 57.98 A30 30 0 0 1 17 57.98 z" fill="#f7d163" class="arc arc2" />
+    <path d="M32 32 L26.79 61.54 A30 30 0 0 1 3.81 21.74 z" fill="#77bee6" class="arc arc3" />
+    <path d="M32 32 L2.46 37.21 A30 30 0 0 1 42.26 3.81 z" fill="#b0cc6b" class="arc arc4" />
+    <path d="M32 32 L37.21 2.46 A30 30 0 0 1 62 32 z" fill="#589ce9" class="arc arc5" />
+    <path d="M32 32 L57.98 17 A30 30 0 0 1 62 32 z" fill="#427dda" class="arc arc6" />
+</svg>

@@ -1,0 +1,166 @@
+/*
+ *  Copyright (c) 2019-present, Aleksandr Telegin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
+.chart {
+  position: relative;
+  overflow: hidden;
+}
+.chart .header{
+  height: 50px;
+  position: relative;
+}
+.chart .title {
+  font-size: 16px;
+  margin: 15px 0 0 20px;
+  position: absolute;
+  transform-origin: top left;
+  -webkit-transform-origin: bottom left;
+}
+.chart .zoom {
+  opacity: 0;
+  position: absolute;
+  transform-origin: bottom left;
+  -webkit-transform-origin: bottom left;
+  margin: 15px 0 0 20px;
+}
+.chart .zoom .zoomIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+  margin: 0 8px 0 0;
+  top: 5px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAdVBMVEUAAAAQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+OtSfirAAAAJ3RSTlMA5en9VPD44M6SPDryrbm0NiDbLcGPZQjWvoFZQCkVEQ2eb0NPTQo+24OLAAAA50lEQVQoz4WP23KDMAxELYR8w9xsIEACIUnb///EmmLGnk463ae1jke7Yj9ah1qA7Av2S9eODBEZodp0fFHcVM+XzpXF8ZYAhfZ6uPbBRRP3cBsfPXZbsGvH82RthUOwA1Vp4Cc/n7V5puAuRWgm6MXYXJe7auc/8pAIpBmb8JAvW6I+gCSf7XSxS2/sMpELBY1KMxaQ98M1wrYJmFHFwx9xrgGW07cj77/O+UgQz70JrD5Wf/UyA0GWkKZDLutyAgQ/z7JItqESHEkql0dyJjWF23vmWSSJ/ifwFzGSvSNgrGZviSzYNyH9CvXxutyLAAAAAElFTkSuQmCC');
+}
+.chart .date {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+.chart .date a {
+  position: absolute;
+  right: 0;
+}
+.chart .zoomText {
+  font-weight: normal;
+  font-size: 16px;
+  color: #108BE3;
+  padding: 0 0 20px;
+}
+.chart .localRange {
+  font-size: 12px;
+  top: 0;
+  padding: 17px 20px 0 0;
+  margin: 0;
+  right: 0;
+  transform-origin: top right;
+  -webkit-transform-origin: bottom left;
+  position: absolute;
+}
+.chart .zoomedRange {
+  font-size: 12px;
+  top: 0;
+  padding: 17px 20px 0 0;
+  margin: 0;
+  right: 0;
+  position: absolute;
+  opacity: 0;
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom left;
+}
+.chart .ctrls {
+  padding: 0 6px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  transition: transform .3s ease;
+}
+.chart .checkbox {
+  margin: 10px 0 0 10px;
+  padding: 9px 12px 9px 30px;
+  cursor: pointer;
+  position: relative;
+  border-radius: 7px;
+  border-width: 1px;
+  border-style: solid;
+  font-size: 14px;
+  min-width: auto;
+}
+.chart .checkbox.shake {
+  -webkit-animation: shake .3s ease alternate;
+}
+.chart .checkbox span.chk {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAflBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////vroaSAAAAKXRSTlMA9F4IBPHk2dK8fXYxD/z4wLSvo5yGVEdCIhvIqJiPWFA9Nykf3ctiF+A174kAAADgSURBVEjH7ZJZDoJAEAWbAREB2RRwRTaXvv8FNUyr0QTy+CXUH0kldGoezUyau+NaY/w85CDxcb+x+UV4VqC/jlhzJIxE/DTH/I34BWGk4idgJiW+s8b82tD+AozaXrUflmDQFWsuNC6QB/qu+FsaF2hlYv5OAi0PmL+3tW/UvYqZKfP7cWRN/0QfMXN8+A/k9p/gdAf7v4FOvb733kAGBlJLFlLrE8hph2YQs3BubvK3ioawChaMAFyQkkvwBVXyWPiC9pHY8IKsLcMLErygC7QjmNxmNkoagX+KMpqZGE/sxyrbXghwlwAAAABJRU5ErkJggg==');
+  transition: transform .15s ease;
+}
+.chart .checkbox span.name {
+  font-weight: normal;
+  display: inline-block;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.chart .legend {
+  position: absolute;
+  padding: 8px 10px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.4);
+  white-space: nowrap;
+  max-width: 300px;
+  z-index: 9999;
+  transform: translate3d(0, -200px, 0);
+  -webkit-transform-origin: bottom left;
+  top: 0;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  opacity: 0;
+  transition: opacity .3s ease;
+  overflow-y: auto;
+  max-height: 200px;
+}
+.chart .legend .xval {
+  font-weight: bold;
+  margin: 0 22px 5px 0;
+  flex-shrink: 0;
+}
+.chart .legend .label, .chart .legend .labelTotal {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: row;
+  padding: 5px 0 0 0;
+  flex-shrink: 0;
+}
+.chart .legend .labelTotal {
+  display: none;
+}
+.chart .legend .labelPercent {
+  display: none;
+  font-weight: bold;
+  font-size: 12px;
+  text-align: right;
+  min-width: 30px;
+  padding: 0 10px 0 0;
+  flex-shrink: 0;
+}
+.chart .legend .labelName, .chart .legend .labelNameTotal {
+  font-size: 12px;
+  padding: 0 10px 0 0;
+}
+.chart .legend .labelValue, .chart .legend .labelValueTotal {
+  font-weight: bold;
+  font-size: 12px;
+  flex: 1;
+  text-align: right;
+}

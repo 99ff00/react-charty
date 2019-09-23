@@ -1,0 +1,34 @@
+{
+  "name": "react-charty-example",
+  "homepage": "https://99ff00.github.io/react-charty",
+  "version": "0.1.1",
+  "license": "MIT",
+  "dependencies": {
+    "prop-types": "^15.6.2",
+    "react": "^16.4.1",
+    "react-charty": "file:..",
+    "react-dom": "^16.4.1",
+    "react-scripts": "^3.1.1",
+    "react-app-polyfill": "^1.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all",
+      "ie 11"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "ie 11"
+    ]
+  }
+}
