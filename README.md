@@ -28,11 +28,11 @@ Please check out the [Demo App](https://99ff00.github.io/react-charty/) for exam
 ### Installation
 
 ```bash
-npm install --save react-charty
+yarn add react-charty
 ```
 or
 ```bash
-yarn add react-charty
+npm install react-charty --save
 ```
 
 ### Usage
