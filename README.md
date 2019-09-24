@@ -1,13 +1,33 @@
 <img src="https://99ff00.github.io/react-charty/charty.svg" width="128" height="128" title="react-charty logo" />
 
-# react-charty [![npm version](https://img.shields.io/npm/v/react-charty.svg?style=flat)](https://www.npmjs.com/package/react-charty)
+# react-charty [![npm version](https://badge.fury.io/js/react-charty.svg)](https://badge.fury.io/js/react-charty) [![npm](https://img.shields.io/npm/dt/react-charty.svg)](https://www.npmjs.org/package/react-charty) ![MIT](https://img.shields.io/dub/l/vibe-d.svg)
 
 This component was born from the [Telegram](https://telegram.org/) programming contest where I took one of the prize places. A big thanks to the Telegram team and all contestants.
 Read further to find usage instructions and how to customize this component.
 
 Please check out the [Demo App](https://99ff00.github.io/react-charty/) for example charts and usage!
 
-### Features
+## Table of contents
+- [Install](#install)
+- [Features](#features)
+- [Browsers support](#browsers-support)
+- [Usage](#usage)
+- [Theming](#theming)
+- [Props](#props)
+- [Display Data Types](#display-data-types)
+- [Using as a standalone library](#using-as-a-standalone-library)
+
+## Install
+
+```bash
+yarn add react-charty
+```
+or
+```bash
+npm install react-charty --save
+```
+
+## Features
 
 - Small footprint (it's just 12KB minified and gzipped)
 - The following chart types are supported: Line, Multi Y Axis Line, Stacked Bar, Percentage, and Pie
@@ -20,22 +40,12 @@ Please check out the [Demo App](https://99ff00.github.io/react-charty/) for exam
 - Can be used as a standalone library without React
 - Different chart types can be combined
 
-### Browsers support
+## Browsers support
 
 | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" /></br>IE 11 / Edge | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" /></br>Firefox | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" /></br>Chrome |<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" /></br>Safari | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari-ios/safari-ios_48x48.png" alt="iOS Safari" width="24px" height="24px" /></br>iOS Safari | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/samsung-internet/samsung-internet_48x48.png" alt="Samsung" width="24px" height="24px" /></br>Samsung | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" /></br>Opera |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
 
-### Installation
-
-```bash
-yarn add react-charty
-```
-or
-```bash
-npm install react-charty --save
-```
-
-### Usage
+## Usage
 
 Here's an example how to get a really basic chart like the one on this screenshot below. For more complex examples please check the [Demo App](https://99ff00.github.io/react-charty/).
 
@@ -74,7 +84,7 @@ export default class App extends Component {
 }
 ```
 
-### Theming
+## Theming
 
 The chart controls can be customized via `theme` prop. Here's an example of two themes. The `LIGHT_THEME` is hardcoded in the Charty component and used if no theme is provided.
 For a theme switching example please check the [Demo App](https://99ff00.github.io/react-charty/). Also, please check [styles.css](./src/styles.css) for even more customization.
@@ -103,7 +113,7 @@ const DARK_THEME = {
 };
 ```
 
-### Props
+## Props
 
 | Name              | Type        | Description                                                         |
 |-------------------|-------------|---------------------------------------------------------------------|
@@ -124,8 +134,8 @@ const DARK_THEME = {
 |`showButtons`      |Boolean      |If set to `false` the series buttons won't be visible. The default value is `true`.|
 |`showRangeText`    |Boolean      |Show/hide current range text in top right corner. The default value is `true`.|
 |`rangeTextType`    |String       |Defines the display type of current range. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
-|`xAxisType`        |String       |Defines the type of `x` axis.|
-|`yAxisType`        |String       |Defines the type of `y` axis.|
+|`xAxisType`        |String       |Defines the type of `x` axis. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value and returns the formatted value.|
+|`yAxisType`        |String       |Defines the type of `y` axis. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `y` value and returns the formatted value.|
 |`xAxisStep`        |Number       |Defines the step for `x` axis. If not specified, the step value will be calculated automatically.|
 |`onZoomIn`         |Function     |This callback is called when some point is clicked on chart. It should accept the clicked `x` position and must return `Promise` loading the next chart data. Originally, this callback was used to zoom in, i.e. display more details chart for selected `x`. But you can also use it to load any supported chart.|
 |`zoomInterval`     |Number       |By default, when zomming, the chart will try to figure out the start and the end of `x` axis. But you can also set the interval to zoom in (for example, if `x` axis is a timestamp and you want to zoom in one week, the interval would be `604800000`) and chart will put the current position in the middle of this interval.|
@@ -134,13 +144,13 @@ const DARK_THEME = {
 |`minY`             |Number       |Set the minimum value for `y` axis. This property is ignored if `autoScale` is set to `true`.|
 |`maxY`             |Number       |Set the maximum value for `y` axis. This property is ignored if `autoScale` is set to `true`.|
 
-### Display Data Types
+## Display Data Types
 
 Currently the following data types are supported. If no data type is specified the chart assumes it's just an integer value.
 
 | Type              | Description                                                                       |
 |-------------------|-----------------------------------------------------------------------------------|
-|`number`           |Integer value with housands separator, i.e. `9 189 141`|
+|`number`           |Integer value with thousands separator, i.e. `9 189 141`|
 |`time`             |Display time in format `HH:mm`, i.e. `09:42`|
 |`date`             |Display date in format `MMM D`, i.e. `Jan 1`|
 |`shortDate`        |Same like `date`|
@@ -149,16 +159,15 @@ Currently the following data types are supported. If no data type is specified t
 |`float1`           |Float value with one decimal place, i.e. `45.2`|
 |`float2`           |Float value with two decimal places, i.e. `45.24`|
 
-### Using as a standalone library
+## Using as a standalone library
 
-The Charty lib can be used standalone without React, for example:
+The Charty component can be used as a standalone library without React, for example:
 
 ```html static
 <html>
-
 <head>
-  <script src="dist/charty.min.js"></script>
-  <link rel="stylesheet" href="dist/charty.css">
+  <script src="https://unpkg.com/react-charty"></script>
+  <link rel="stylesheet" href="https://unpkg.com/react-charty/dist/charty.css">
   ...
   <script>
     window.addEventListener('load', function(){
