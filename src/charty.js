@@ -530,18 +530,18 @@ var Charty = (function () {
       if ((TYPES.bar || TYPES.area || TYPES.pie)) {
         ctx.fillStyle = UI.preview.brushBorderColor
         ctx.globalAlpha = UI.preview.brushBorderAlpha
-        UI.canvas.rect(start - 1, UI.preview.y - 1, hw + 3, UI.preview.height + 3, UI.preview.radius + 1, true)
-        UI.canvas.rect(end - hw - 2, UI.preview.y - 1, hw + 3, UI.preview.height + 3, UI.preview.radius + 1, false, true)
+        UI.canvas.rect(start - hw - 1, UI.preview.y - 1, hw + 3, UI.preview.height + 3, UI.preview.radius + 1, true)
+        UI.canvas.rect(end - 1, UI.preview.y - 1, hw + 3, UI.preview.height + 3, UI.preview.radius + 1, false, true)
       }
 
       ctx.globalAlpha = a
       ctx.fillStyle = UI.preview.brushColor
-      UI.canvas.rect(start, UI.preview.y, hw, UI.preview.height, UI.preview.radius, true)
-      UI.canvas.rect(end - hw, UI.preview.y, hw, UI.preview.height, UI.preview.radius, false, true)
-      ctx.strokeRect(start + hw, UI.preview.y + UI.preview.vPadding / 2, end - start - 2 * hw, UI.preview.height - UI.preview.vPadding)
+      UI.canvas.rect(start - hw, UI.preview.y, hw, UI.preview.height, UI.preview.radius, true)
+      UI.canvas.rect(end, UI.preview.y, hw, UI.preview.height, UI.preview.radius, false, true)
+      ctx.strokeRect(start, UI.preview.y + UI.preview.vPadding / 2, end - start, UI.preview.height - UI.preview.vPadding)
       ctx.fillStyle = '#fff'
-      renderHandle(start + 4)
-      renderHandle(end - 6)
+      renderHandle(start - 6)
+      renderHandle(end + 4)
     }
 
     function renderPreview() {
@@ -555,14 +555,14 @@ var Charty = (function () {
         return
 
       ctx.save()
-      UI.canvas.rect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, w, minH, UI.preview.radius, true, true, true)
+      UI.canvas.rect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, w, minH, UI.preview.radius, valToX(V.localStart) > UI.chart.hPadding + UI.preview.handleW / 2, valToX(V.localEnd) < UI.main.width - UI.chart.hPadding - UI.preview.handleW / 2, true)
       ctx.lineWidth = UI.preview.lineWidth
       ctx.globalAlpha = a
       renderSeries('global', a, w, h - 2 * UI.preview.vPadding, V.globalStart, V.globalEnd, 0, UI.chart.height - UI.preview.vPadding, UI.chart.hPadding, true)
       ctx.fillStyle = UI.preview.maskColor
       ctx.globalAlpha = a * UI.preview.maskAlpha
-      ctx.fillRect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, valToX(V.localStart) - UI.preview.handleW, minH)
-      ctx.fillRect(valToX(V.localEnd) - UI.preview.handleW, UI.preview.y + UI.preview.vPadding, UI.main.width + UI.preview.handleW - UI.chart.hPadding - valToX(V.localEnd), minH)
+      ctx.fillRect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, valToX(V.localStart) - UI.chart.hPadding, minH)
+      ctx.fillRect(valToX(V.localEnd), UI.preview.y + UI.preview.vPadding, UI.main.width + UI.preview.handleW - UI.chart.hPadding - valToX(V.localEnd), minH)
       ctx.restore()
       renderBrush(a)
     }
