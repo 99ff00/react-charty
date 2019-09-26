@@ -120,10 +120,11 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  min-width: 150px;
+  min-width: 155px;
   opacity: 0;
   transition: opacity .3s ease;
   overflow-y: auto;
+  overflow-x: hidden;
   max-height: 200px;
 }
 .chart .legend .xval {
