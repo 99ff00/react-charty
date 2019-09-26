@@ -12,7 +12,7 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "cp ./src/styles.css ./dist/charty.css ; tac ./src/charty.js | sed 1,2d | tac | sed 1,12d | terser -c -m -o ./dist/charty.min.js ; rollup -c",
+    "build": "cleancss -o ./dist/charty.min.css ./src/styles.css ; tac ./src/charty.js | sed 1,2d | tac | sed 7,12d | terser -c --comments all -m -o ./dist/charty.min.js ; rollup -c",
     "start": "rollup -c -w",
     "prepare": "npm run build",
     "predeploy": "cd example && npm install && npm run build",
