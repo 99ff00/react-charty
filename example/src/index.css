@@ -15,19 +15,19 @@ body.dark {
 }
 h3 {
   font-size: 16px;
-  color: #108BE3;
-  text-align: center;
   cursor: pointer;
   margin: 20px;
   margin-bottom: 10px;
+}
+.note {
+  color: #108BE3;
+  text-align: center;
 }
 h3.bottom {
   margin-bottom: 30px;
 }
 h4.note {
   font-size: 14px;
-  color: #108BE3;
-  text-align: center;
   font-weight: 500;
   margin: 0;
 }
@@ -35,4 +35,9 @@ h4.note {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+}
+a {
+  position: absolute;
+  top: 0;
+  right: 0;
 }

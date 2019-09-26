@@ -3,25 +3,68 @@ import React, { Component } from 'react'
 import Charty from 'react-charty'
 
 const LIGHT_THEME = {
+    name: 'light',
     grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff' },
     legend: { background: '#fff', color: '#000' },
-    preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1', brushBorderColor: '#fff', brushBorderAlpha: 1 },
+    preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1', brushBorderColor: '#fff', brushBorderAlpha: 1, handleColor: '#fff' },
     xAxis: { textColor: '#8E8E93', textAlpha: 1 },
     yAxis: { textColor: '#8E8E93', textAlpha: 1 },
     title: { color: '#000' },
     localRange: { color: '#000' },
-    zoomedRange: { color: '#000' }
+    zoomedRange: { color: '#000' },
+    zoomText: { color: '#108BE3' },
+    zoomIcon: { fill: '#108BE3' },
+    buttons: { color: '#fff' },
+    pie: { textColor: '#fff' },
+    body: { backgroundColor: '#fff', color: '#000' },
+    noteColor: '#108BE3',
+    octoColor: '#fff'
   },
   DARK_THEME = {
+    name: 'dark',
     grid: { color: '#fff', alpha: 0.1, markerFillColor: '#242f3e' },
     legend: { background: '#1c2533', color: '#fff' },
-    preview: { maskColor: '#304259', maskAlpha: 0.6, brushColor: '#56626D', brushBorderAlpha: 0 },
+    preview: { maskColor: '#304259', maskAlpha: 0.6, brushColor: '#56626D', brushBorderAlpha: 0, handleColor: '#fff' },
     xAxis: { textColor: '#A3B1C2', textAlpha: 0.6 },
     yAxis: { textColor: '#A3B1C2', textAlpha: 0.6 },
     title: { color: '#fff' },
     localRange: { color: '#fff' },
-    zoomedRange: { color: '#fff' }
+    zoomedRange: { color: '#fff' },
+    zoomText: { color: '#108BE3' },
+    zoomIcon: { fill: '#108BE3' },
+    buttons: { color: '#fff' },
+    pie: { textColor: '#fff' },
+    body: { backgroundColor: '#262f3d', color: '#fff' },
+    noteColor: '#108BE3',
+    octoColor: '#fff'
   },
+  MATRIX_THEME = {
+    name: 'matrix',
+    grid: { color: '#00ff41', alpha: 0.2, markerFillColor: '#0d0208' },
+    legend: { background: '#003b00', color: '#00ff41' },
+    preview: { maskColor: '#003b00', maskAlpha: 0.6, brushColor: '#009f11', brushBorderAlpha: 0, handleColor: '#00ff41' },
+    xAxis: { textColor: '#00ff41', textAlpha: 0.6 },
+    yAxis: { textColor: '#00ff41', textAlpha: 0.6 },
+    title: { color: '#008f11' },
+    localRange: { color: '#008f11' },
+    zoomedRange: { color: '#008f11' },
+    zoomText: { color: '#008f11' },
+    zoomIcon: { fill: '#008f11' },
+    buttons: { color: '#0d0208' },
+    pie: { textColor: '#0d0208' },
+    series: {
+      'Joined': '#00ff41', 'Left': '#008f11', 'Views': '#00ff41', 'Shares': '#008f11', 'Clicks': '#008f11',
+      'Kiwi': '#00ff41', 'Apricots': '#008f11', 'Lemons': '#005b00', 'Mango': '#7ec251', 'Oranges': '#145105',
+      'Pears': '#66e82f', 'Apples': '#0acb3b',
+      'Adventure': '#03c835', 'Western': '#008f11', 'Action': '#00ff41', 'Multiple Genres': '#66e82f', 'Drama': '#0acb3b',
+      'Comedy': '#008f11', 'Thriller/Suspense': '#005b00', 'Concert/Performance': '#7ec251', 'Horror': '#145105',
+      'Romantic Comedy': '#12842f', 'Musical': '#079d2e'
+    },
+    body: { backgroundColor: '#0d0208', color: '#00ff41' },
+    noteColor: '#008f11',
+    octoColor: '#00ff41'
+  },
+  THEMES = [DARK_THEME, MATRIX_THEME, LIGHT_THEME],
   IS_MOBILE = window.orientation !== undefined,
   BOX_OFFICE_DATA = {
     type: 'pie',
@@ -76,7 +119,7 @@ export default class App extends Component {
 
     this.state = {
       isLoaded: false,
-      theme: DARK_THEME,
+      themeIdx: 0,
       data: []
     }
   }
@@ -90,17 +133,34 @@ export default class App extends Component {
       isLoaded: true,
       data
     })
+
+    var themeName = window.location.hash.substr(1),
+      idx = THEMES.findIndex((theme) => theme.name === themeName),
+      themeIdx = Math.max(0, idx)
+
+    this.setState({ themeIdx })
+    this.setTheme(themeIdx)
+  }
+
+  setTheme = (themeIdx) => {
+    var theme = THEMES[themeIdx]
+    document.body.style.backgroundColor = theme.body.backgroundColor
+    document.body.style.color = theme.body.color
+    document.querySelectorAll('.note').forEach((el) => {
+      el.style.color = theme.noteColor
+    })
+    document.getElementById('octo').style.fill = theme.octoColor
   }
 
   switchTheme = () => {
-    const isDarkTheme = this.state.theme === DARK_THEME;
+    var themeIdx = this.state.themeIdx
+    themeIdx++
 
-    this.setState({
-      theme: isDarkTheme ? LIGHT_THEME : DARK_THEME
-    })
+    if (themeIdx === THEMES.length)
+      themeIdx = 0
 
-    document.body.style.backgroundColor = isDarkTheme ? '#fff' : '#262f3d'
-    document.body.style.color = isDarkTheme ? '#000' : '#fff'
+    this.setState({ themeIdx })
+    this.setTheme(themeIdx)
   }
 
   onZoomIn = async (id, x) => {
@@ -113,7 +173,7 @@ export default class App extends Component {
     if (day.length < 2) day = '0' + day
 
     var file = 'data/' + id + '/' + year + '-' + month + '/' + day + '.json',
-        response = await fetch(file)
+      response = await fetch(file)
 
     return response.json()
   }
@@ -123,13 +183,13 @@ export default class App extends Component {
       return null;
 
     const width = IS_MOBILE ? '100%' : '50%',
-      theme = this.state.theme,
+      theme = THEMES[this.state.themeIdx],
       data = this.state.data,
       style = { width, marginTop: 20 }
 
     return (
       <React.Fragment>
-        <h3 onClick={this.switchTheme}>Switch theme</h3>
+        <h3 className="note" onClick={this.switchTheme}>Switch theme</h3>
         <h4 className="note">(click on the {IS_MOBILE ? 'legend' : 'chart'} to zoom in)</h4>
         <div className="container">
           <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
@@ -139,7 +199,7 @@ export default class App extends Component {
           <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
           <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>
-        <h3 className="bottom" onClick={this.switchTheme}>Switch theme</h3>
+        <h3 className="bottom note" onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>
     )
   }
