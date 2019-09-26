@@ -26,16 +26,16 @@
   -webkit-transform-origin: bottom left;
   margin: 15px 0 0 20px;
 }
-.chart .zoom .zoomIcon {
+.chart .zoom svg {
   width: 16px;
   height: 16px;
   display: inline-block;
   position: relative;
-  margin: 0 8px 0 0;
+  margin: 0 4px 0 0;
   top: 5px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAdVBMVEUAAAAQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+MQi+OtSfirAAAAJ3RSTlMA5en9VPD44M6SPDryrbm0NiDbLcGPZQjWvoFZQCkVEQ2eb0NPTQo+24OLAAAA50lEQVQoz4WP23KDMAxELYR8w9xsIEACIUnb///EmmLGnk463ae1jke7Yj9ah1qA7Av2S9eODBEZodp0fFHcVM+XzpXF8ZYAhfZ6uPbBRRP3cBsfPXZbsGvH82RthUOwA1Vp4Cc/n7V5puAuRWgm6MXYXJe7auc/8pAIpBmb8JAvW6I+gCSf7XSxS2/sMpELBY1KMxaQ98M1wrYJmFHFwx9xrgGW07cj77/O+UgQz70JrD5Wf/UyA0GWkKZDLutyAgQ/z7JItqESHEkql0dyJjWF23vmWSSJ/ifwFzGSvSNgrGZviSzYNyH9CvXxutyLAAAAAElFTkSuQmCC');
+}
+.chart .zoom svg path {
+  fill: #108BE3;
 }
 .chart .date {
   position: relative;
@@ -94,16 +94,12 @@
 .chart .checkbox.shake {
   -webkit-animation: shake .3s ease alternate;
 }
-.chart .checkbox span.chk {
-  width: 16px;
-  height: 16px;
+.chart .checkbox svg {
+  width: 14px;
+  height: 14px;
   position: absolute;
-  left: 8px;
-  top: 10px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAflBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////vroaSAAAAKXRSTlMA9F4IBPHk2dK8fXYxD/z4wLSvo5yGVEdCIhvIqJiPWFA9Nykf3ctiF+A174kAAADgSURBVEjH7ZJZDoJAEAWbAREB2RRwRTaXvv8FNUyr0QTy+CXUH0kldGoezUyau+NaY/w85CDxcb+x+UV4VqC/jlhzJIxE/DTH/I34BWGk4idgJiW+s8b82tD+AozaXrUflmDQFWsuNC6QB/qu+FsaF2hlYv5OAi0PmL+3tW/UvYqZKfP7cWRN/0QfMXN8+A/k9p/gdAf7v4FOvb733kAGBlJLFlLrE8hph2YQs3BubvK3ioawChaMAFyQkkvwBVXyWPiC9pHY8IKsLcMLErygC7QjmNxmNkoagX+KMpqZGE/sxyrbXghwlwAAAABJRU5ErkJggg==');
-  transition: transform .15s ease;
+  left: 10px;
+  bottom: 10px;
 }
 .chart .checkbox span.name {
   font-weight: normal;

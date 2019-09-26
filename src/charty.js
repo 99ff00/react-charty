@@ -13,26 +13,47 @@ import styles from './styles.css'
 var Charty = (function () {
   var CHARTY = '<div id=|header>\
       <h3 id=|title></h3>\
-      <h3 id=|zoom><span id=|zoomIcon></span><span id=|zoomText>Zoom Out</span></h3>\
+      <h3 id=|zoom>\
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
+          <path id=|zoomIcon d="M13 10h-8v-2h8v2zm8.172 14l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/>\
+        </svg>\
+        <span id=|zoomText>Zoom Out</span>\
+      </h3>\
       <h4 id=|localRange></h4>\
       <h4 id=|zoomedRange></h4>\
     </div>\
     <canvas id=|canvas></canvas>\
     <div id=|ctrls></div>\
     <div id=|legend></div>',
-    CTRLS = '[<label id=|checkbox{i} style="background: {color}; border-color: {color}"><span id=|name{i} style="color:#fff">{name}</span><span id=|chk{i}></span></label>]',
+    CTRLS = '[<label id=|checkbox{i} style="background: {color}; border-color: {color}">\
+        <span id=|name{i} style="color:#fff">{name}</span>\
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
+          <path id=|chk{i} d="m9 21.035l-9-8.638 2.791-2.87 6.156 5.874 12.21-12.436 2.843 2.817z"/>\
+        </svg>\
+      </label>]',
     LEGEND = '<div id=|date><span id=|xval></span></div>\
-      [<div id=|label{i}><div id=|labelPercent{i}></div><div id=|labelName{i}></div><div id=|labelValue{i} style="color:{color}"></div></div>]\
-      <div id=|labelTotal><div id=|labelNameTotal>All</div><div id=|labelValueTotal></div></div>',
+      [<div id=|label{i}>\
+        <div id=|labelPercent{i}></div>\
+        <div id=|labelName{i}></div>\
+        <div id=|labelValue{i} style="color:{color}"></div>\
+      </div>]\
+      <div id=|labelTotal>\
+        <div id=|labelNameTotal>All</div>\
+        <div id=|labelValueTotal></div>\
+      </div>',
     DEFAULT_THEME = {
       grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff' },
       legend: { background: '#fff', color: '#000' },
-      preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1' },
+      preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1', brushBorderColor: '#fff', brushBorderAlpha: 1, handleColor: '#fff' },
       xAxis: { textColor: '#8E8E93', textAlpha: 1 },
       yAxis: { textColor: '#8E8E93', textAlpha: 1 },
       title: { color: '#000' },
       localRange: { color: '#000' },
-      zoomedRange: { color: '#000' }
+      zoomedRange: { color: '#000' },
+      zoomText: { color: '#108BE3' },
+      zoomIcon: { fill: '#108BE3' },
+      buttons: { color: '#fff' },
+      pie: { textColor: '#fff' }
     },
     PI_RAD = Math.PI / 180,
     FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
@@ -214,7 +235,7 @@ var Charty = (function () {
       STATE = {}, myIdx = CHARTS.length, parentSeries, currentTheme,
       UI = UI_ || {
         chart: { topPadding: 50, hPadding: 15, height: 400 },
-        pie: { textColor: '#fff', segmentShift: 5 },
+        pie: { segmentShift: 5 },
         preview: { height: 46, vPadding: 1, radius: 8, lineWidth: 1, handleW: 9, handleTick: 10, minBrushSize: 10, hitSlop: 10 },
         grid: { lineWidth: 1, legendShift: -10, markerRadius: 3, markerLineWidth: 4 },
         xAxis: { textWidth: 80, height: 32, fadeTime: 250 },
@@ -228,8 +249,8 @@ var Charty = (function () {
     if (parent)
       parentSeries = parent.getSeries()
 
-    function setTheme(theme) {
-      currentTheme = theme
+    function updateTheme(theme_) {
+      var theme = currentTheme || theme_
       for (var id in theme) {
         if (UI[id]) {
           if (UI[id].stylo)
@@ -238,22 +259,21 @@ var Charty = (function () {
             UI[id][key] = theme[id][key]
         }
       }
-      for (var i = 0; i < AYL; i++) {
-        var s = AY[i]
-        if (UI['checkbox' + i]) {
-          if (theme.buttons)
-            UI['name' + i].stylo({ color: theme.buttons[s.name] })
-          if (UI['labelValue' + i] && theme.labels)
-            UI['labelValue' + i].stylo({ color: theme.labels[s.name] })
-        }
-        s.barColor = (currentTheme.bars || {})[s.name] || s.color
-        s.lineColor = (currentTheme.lines || {})[s.name] || s.color
-      }
+      AY.map(function (S, i, series) {
+        S.color = theme.series && theme.series[S.name] ? theme.series[S.name] : S._color
+        updateCheckbox(i, S.off, series)
+      })
+      if (V.zoomedChart)
+        V.zoomedChart.getSeries().map(function (S, i, series) {
+          S.color = theme.series && theme.series[S.name] ? theme.series[S.name] : S._color
+        })
       V.stepGridX = undefined
       V.stepGridY = undefined
+
       repaint()
     }
 
+    this.updateTheme = updateTheme
     this.setTheme = setTheme
     this.getDefaultTheme = function () {
       return DEFAULT_THEME
@@ -277,14 +297,19 @@ var Charty = (function () {
       })
     }
 
-    function updateTheme() {
-      if (parent)
-        setTheme(parent.getTheme())
-      else if (currentTheme)
-        setTheme(currentTheme)
-      else {
-        setTheme(props.theme || DEFAULT_THEME)
+    function setTheme(theme_) {
+      if (theme_) {
+        currentTheme = theme_
+        if (V.zoomedChart) {
+          V.zoomedChart.setTheme(theme_)
+          V.zoomedChart.updateTheme()
+        }
+        return updateTheme()
       }
+      if (parent)
+        currentTheme = parent.getTheme()
+      else if (!currentTheme)
+        currentTheme = props.theme || DEFAULT_THEME
     }
 
     function renderLegend() {
@@ -406,6 +431,7 @@ var Charty = (function () {
       for (var i = 0, S; i < AYL; i++) {
         var S = AY[i], off = false
 
+        S._color = S.color
         if (!TYPES.percentage) {
           STREE_MAX[i] = initSTree(S.data)
           buildSTree(STREE_MAX[i], S.data, Math.max)
@@ -431,16 +457,14 @@ var Charty = (function () {
       V.minBrushSize = X.d * UI.preview.minBrushSize / 100
       V.seriesCount = AYL
 
+      setTheme()
+
       if (!restart) {
         if (parent) {
-          renderLegend()
-          renderCtrls()
           parent.togglePreview(V.showPreview)
         } else {
           byId(ID).innerHTML = parse(CHARTY)
           IDs.map(flerken)
-          renderLegend()
-          renderCtrls()
           togglePreview(V.showPreview)
           UI.title.innerText = props.title
           ctx = UI.canvas.getContext('2d')
@@ -448,7 +472,10 @@ var Charty = (function () {
         }
       }
 
+      renderLegend()
+      renderCtrls()
       updateTheme()
+
       V.forceUpdate = true
       repaint()
       measureUI()
@@ -539,7 +566,7 @@ var Charty = (function () {
       UI.canvas.rect(start - hw, UI.preview.y, hw, UI.preview.height, UI.preview.radius, true)
       UI.canvas.rect(end, UI.preview.y, hw, UI.preview.height, UI.preview.radius, false, true)
       ctx.strokeRect(start, UI.preview.y + UI.preview.vPadding / 2, end - start, UI.preview.height - UI.preview.vPadding)
-      ctx.fillStyle = '#fff'
+      ctx.fillStyle = UI.preview.handleColor || '#fff'
       renderHandle(start - 6)
       renderHandle(end + 4)
     }
@@ -682,11 +709,11 @@ var Charty = (function () {
         val = '' + Math.floor(c === 0 ? localMin : y_)
 
         ctx.globalAlpha = a * p * a0 * UI.yAxis.textAlpha
-        ctx.fillStyle = TYPES.multi_yaxis ? AY[0].lineColor : UI.yAxis.textColor
+        ctx.fillStyle = TYPES.multi_yaxis ? AY[0].color : UI.yAxis.textColor
         u = props.yAxisType instanceof Function ? props.yAxisType(val) : DATA_TYPES[props.yAxisType](val)
         ctx.fillText(u, UI.chart.hPadding, yPos - 5)
         if (TYPES.multi_yaxis) {
-          ctx.fillStyle = AY[1].lineColor || UI.yAxis.textColor
+          ctx.fillStyle = AY[1].color || UI.yAxis.textColor
           val = Math.max(0, Math.floor(lowerMin + (y - localMin) / localD * minLocalD))
           if (c > 0 && val > 50)
             val = Math.ceil(val / 10) * 10
@@ -711,7 +738,7 @@ var Charty = (function () {
       height -= UI.grid.markerRadius + UI.grid.markerLineWidth
       for (var s = 0, idx, x, data, color; s < AYL; s++) {
         data = AY[s].data
-        color = AY[s].lineColor
+        color = AY[s].color
 
         UI.canvas.startLine((1 - V.progress) * A['alphaY' + s], color, 0, ctx.lineWidth)
         idx = TYPES.multi_yaxis ? s : ''
@@ -746,7 +773,7 @@ var Charty = (function () {
       for (var s = 0; s < AYL; s++) {
         alpha = A['alphaY' + s] * p
         ctx.globalAlpha = masterA * (isPreview ? alpha : (selectedIdx >= 0 ? 0.5 : alpha))
-        ctx.fillStyle = AY[s].barColor
+        ctx.fillStyle = AY[s].color
         ctx.beginPath()
         scaleY = (height + UI.main.vPadding / 2) / max
         for (var i = startIdx, val, stack; i <= endIdx; i++) {
@@ -827,7 +854,7 @@ var Charty = (function () {
             ctx.rotate(angle + da)
           }
 
-          UI.canvas.startLine(alpha, 0, S.barColor, ctx.lineWidth)
+          UI.canvas.startLine(alpha, 0, S.color, ctx.lineWidth)
 
           for (var i = startIdx, val, x, y, startX, stack, dy; i <= endIdx; i++) {
             stack = STACK[i] || 0
@@ -849,7 +876,7 @@ var Charty = (function () {
               if (!S.off && !filled) {
                 filled = true
                 ctx.globalAlpha = masterA
-                ctx.fillStyle = S.barColor
+                ctx.fillStyle = S.color
                 ctx.fillRect(startX, -offsetY + 26, x - startX, 2 * offsetY)
                 if (V.seriesCount === 1)
                   break
@@ -955,7 +982,7 @@ var Charty = (function () {
         S.z = z
 
         ctx.globalAlpha = masterA
-        ctx.fillStyle = S.barColor
+        ctx.fillStyle = S.color
         ctx.beginPath()
         ctx.moveTo(dx, dy)
 
@@ -1302,12 +1329,14 @@ var Charty = (function () {
       return area
     }
 
-    function updateCheckbox(i, off) {
-      var to = off ? 0 : 1
+    function updateCheckbox(i, off, series_) {
+      var to = off ? 0 : 1,
+        buttonColor = (currentTheme.buttons || {}).color || '#fff',
+        series = series_ || AY
 
-      UI['checkbox' + i].attr('class', (typeof styles !== 'undefined') ? styles['checkbox'] : ('checkbox ' + (off ? 'off' : 'on'))).stylo({ backgroundColor: off ? 'transparent' : AY[i].color })
-      UI['chk' + i].stylo({ transform: 'scale(' + to + ')', opacity: to }, true)
-      UI['name' + i].stylo({ transform: 'translate3d(' + ((to - 1) * 8) + 'px, 0, 0)', color: off ? AY[i].color : '#fff' })
+      UI['checkbox' + i].attr('class', (typeof styles !== 'undefined') ? styles['checkbox'] : ('checkbox ' + (off ? 'off' : 'on'))).stylo({ backgroundColor: off ? 'transparent' : series[i].color, borderColor: series[i].color })
+      UI['chk' + i].stylo({ transform: 'scale(' + to + ')', opacity: to, fill: buttonColor }, true)
+      UI['name' + i].stylo({ transform: 'translate3d(' + ((to - 1) * 8) + 'px, 0, 0)', color: off ? series[i].color : buttonColor })
     }
 
     function toggleCheckbox(i, off) {
@@ -1729,6 +1758,7 @@ var Charty = (function () {
         })
 
         renderCtrls()
+        updateTheme()
         togglePreview(V.showPreview)
       }
       hideLegend()
@@ -1747,6 +1777,7 @@ var Charty = (function () {
     this.setShowButtons = function(on) {
       V.showButtons = on
       renderCtrls()
+      updateTheme()
     }
 
     this.setStartX = function (x) {
@@ -1775,6 +1806,7 @@ var Charty = (function () {
       if (!V.zoomedChart) {
         renderLegend()
         renderCtrls()
+        updateTheme()
       }
     }
 
