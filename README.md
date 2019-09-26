@@ -16,6 +16,7 @@ Please check out the [Demo App](https://99ff00.github.io/react-charty/) for exam
 - [Props](#props)
 - [Display Data Types](#display-data-types)
 - [Using as a standalone library](#using-as-a-standalone-library)
+- [Demo App](https://99ff00.github.io/react-charty/)
 
 ## Install
 
@@ -93,23 +94,31 @@ For a theme switching example please check the [Demo App](https://99ff00.github.
 const LIGHT_THEME = {
   grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff' },
   legend: { background: '#fff', color: '#000' },
-  preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1' },
+  preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1', brushBorderColor: '#fff', brushBorderAlpha: 1, handleColor: '#fff' },
   xAxis: { textColor: '#8E8E93', textAlpha: 1 },
   yAxis: { textColor: '#8E8E93', textAlpha: 1 },
   title: { color: '#000' },
   localRange: { color: '#000' },
-  zoomedRange: { color: '#000' }
+  zoomedRange: { color: '#000' },
+  zoomText: { color: '#108BE3' },
+  zoomIcon: { fill: '#108BE3' },
+  buttons: { color: '#fff' },
+  pie: { textColor: '#fff' }
 };
 
 const DARK_THEME = {
   grid: { color: '#fff', alpha: 0.1, markerFillColor: '#242f3e' },
   legend: { background: '#1c2533', color: '#fff' },
-  preview: { maskColor: '#304259', maskAlpha: 0.6, brushColor: '#56626D' },
+  preview: { maskColor: '#304259', maskAlpha: 0.6, brushColor: '#56626D', brushBorderAlpha: 0, handleColor: '#fff' },
   xAxis: { textColor: '#A3B1C2', textAlpha: 0.6 },
   yAxis: { textColor: '#A3B1C2', textAlpha: 0.6 },
   title: { color: '#fff' },
   localRange: { color: '#fff' },
-  zoomedRange: { color: '#fff' }
+  zoomedRange: { color: '#fff' },
+  zoomText: { color: '#108BE3' },
+  zoomIcon: { fill: '#108BE3' },
+  buttons: { color: '#fff' },
+  pie: { textColor: '#fff' },
 };
 ```
 
