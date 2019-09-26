@@ -176,7 +176,7 @@ The Charty component can be used as a standalone library without React, for exam
 <html>
 <head>
   <script src="https://unpkg.com/react-charty"></script>
-  <link rel="stylesheet" href="https://unpkg.com/react-charty/dist/charty.css">
+  <link rel="stylesheet" href="https://unpkg.com/react-charty/dist/charty.min.css">
   ...
   <script>
     window.addEventListener('load', function(){
