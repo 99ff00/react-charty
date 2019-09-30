@@ -1330,6 +1330,9 @@ var Charty = (function () {
     }
 
     function updateCheckbox(i, off, series_) {
+      if (!V.showButtons)
+        return
+
       var to = off ? 0 : 1,
         buttonColor = (currentTheme.buttons || {}).color || '#fff',
         series = series_ || AY
