@@ -13,17 +13,24 @@ const sourcemap = !production ? 'inline' : false;
 
 export default {
   input: 'src/index.js',
+  external: ['react', 'react-dom', 'prop-types'],
   output: [
     {
       file: pkg.main,
-      format: 'cjs',
+      format: 'umd',
+      name: 'Charty',
+      globals: {
+        'react': 'React',
+        'react-dom': 'ReactDOM',
+        'prop-types': 'PropTypes'
+      },
       sourcemap
     },
     {
       file: pkg.module,
-      format: 'es',
+      format: 'esm',
       sourcemap
-    }
+    },
   ],
   plugins: [
     external(),
