@@ -5,7 +5,7 @@
 This component was born from the [Telegram](https://telegram.org/) programming contest where I took one of the prize places. A big thanks to the Telegram team and all contestants.
 Read further to find usage instructions and how to customize this component.
 
-Please check out the [Demo App](https://99ff00.github.io/react-charty/) for example charts and usage!
+Please check out the [Demo App](https://99ff00.github.io/react-charty/) and [Playground](https://codepen.io/99ff00/pen/qBWzBpY) for example charts and usage!
 
 ## Table of contents
 - [Install](#install)
@@ -17,6 +17,7 @@ Please check out the [Demo App](https://99ff00.github.io/react-charty/) for exam
 - [Display Data Types](#display-data-types)
 - [Using as a standalone library](#using-as-a-standalone-library)
 - [Demo App](https://99ff00.github.io/react-charty/)
+- [Playground](https://codepen.io/99ff00/pen/qBWzBpY)
 
 ## Install
 
@@ -48,7 +49,7 @@ npm install react-charty --save
 
 ## Usage
 
-Here's an example how to get a really basic chart like the one on this screenshot below. For more complex examples please check the [Demo App](https://99ff00.github.io/react-charty/).
+Here's an example how to get a really basic chart like the one on this screenshot below. This demo is also available in the [Playground](https://codepen.io/99ff00/pen/qBWzBpY). For more complex examples please check the [Demo App](https://99ff00.github.io/react-charty/).
 
 <img src="./assets/example1.png" title="Minimal Example" width="500" />
 
@@ -140,7 +141,7 @@ const DARK_THEME = {
 |`showLegendTitle`  |Boolean      |If set to `false` the legend title will not appear. The default value is `true`.|
 |`legendPosition`   |String       |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the legend popup will follow the cursor position.|
 |`showPreview`      |Boolean      |If set to `false` the chart preview won't be visible. The default value is `true`.|
-|`showButtons`      |Boolean      |If set to `false` the series buttons won't be visible. The default value is `true`.|
+|`showButtons`      |Boolean      |If set to `false` the series buttons won't be visible. Also, the buttons are hidden if there's only one series of data. The default value is `true`.|
 |`showRangeText`    |Boolean      |Show/hide current range text in top right corner. The default value is `true`.|
 |`rangeTextType`    |String       |Defines the display type of current range. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|
 |`xAxisType`        |String       |Defines the type of `x` axis. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value and returns the formatted value.|
