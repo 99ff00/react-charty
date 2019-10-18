@@ -735,21 +735,42 @@ var Charty = (function () {
     }
 
     function renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY) {
-      height -= UI.grid.markerRadius + UI.grid.markerLineWidth
-      for (var s = 0, idx, x, data, color; s < AYL; s++) {
-        data = AY[s].data
-        color = AY[s].color
+      height -= UI.grid.markerRadius + UI.grid.markerLineWidth;
+      for (let sequence = 0, idx, x, data, color; sequence < AYL; sequence++) {
+        data = AY[sequence].data;
+        color = AY[sequence].color;
 
-        UI.canvas.startLine((1 - V.progress) * A['alphaY' + s], color, 0, ctx.lineWidth)
-        idx = TYPES.multi_yaxis ? s : ''
-        scaleY = height / A[type + 'DY' + idx]
+        UI.canvas.startLine((1 - V.progress) * A["alphaY" + sequence], color, 0, ctx.lineWidth);
+        idx = TYPES.multi_yaxis ? sequence : "";
+
+        scaleY = height / A[type + "DY" + idx];
+
         for (var i = startIdx; i <= endIdx; i++) {
-          x = offsetX + hPadding + (AX[i] - vStart) * scaleX
-          if (i === startIdx)
-            ctx.moveTo(x, offsetY - (data[i] - A[type + 'MinY' + idx]) * scaleY)
-          ctx.lineTo(x, offsetY - (data[i] - A[type + 'MinY' + idx]) * scaleY)
+          x = offsetX + hPadding + (AX[i] - vStart) * scaleX;
+          const y = offsetY - (data[i] - A[type + "MinY" + idx]) * scaleY;
+          if (i === startIdx) {
+            ctx.moveTo(x, y);
+          }
+          ctx.lineTo(x, y);
         }
-        ctx.stroke()
+
+        // Draw last point
+        if (AX.length > 0) {
+          let min = a => a.reduce((m, x) => m > x ? m : x);
+          let max = a => a.reduce((m, x) => m < x ? m : x);
+          let yData = data.map(item => offsetY - (item - A[type + "MinY" + idx]) * scaleY);
+          let minY = min(yData);
+          let maxY = min(yData);
+
+          ctx.lineTo(x, minY);
+          x = offsetX + hPadding + (AX[0] - vStart) * scaleX;
+          ctx.lineTo(x, minY);
+
+        }
+
+        ctx.fillStyle = gradient("#34dc96", "#21b032", minY, maxY);
+        ctx.fill();
+        ctx.stroke();
       }
     }
 
