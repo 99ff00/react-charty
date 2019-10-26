@@ -7,6 +7,10 @@
     "y0": "#4BD964",
     "y1": "#FE3C30"
   },
+  "fillColors": {
+    "y0": { "type": "linear_gradient_v", "colors": ["#4BD964", "#4BD964", "#FFFFFF00"] },
+    "y1": "#FE3C3011"
+  },
   "data": {
     "x": [
       1523059200000,

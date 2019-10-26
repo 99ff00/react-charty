@@ -259,13 +259,17 @@ var Charty = (function () {
             UI[id][key] = theme[id][key]
         }
       }
+      function updateColors(S) {
+        S.color = theme.colors && theme.colors[S.name] ? theme.colors[S.name] : S._color
+        S.fillColor = theme.fillColors && theme.fillColors[S.name] ? theme.fillColors[S.name] : S._fillColor
+      }
       AY.map(function (S, i, series) {
-        S.color = theme.series && theme.series[S.name] ? theme.series[S.name] : S._color
+        updateColors(S)
         updateCheckbox(i, S.off, series)
       })
       if (V.zoomedChart)
-        V.zoomedChart.getSeries().map(function (S, i, series) {
-          S.color = theme.series && theme.series[S.name] ? theme.series[S.name] : S._color
+        V.zoomedChart.getSeries().map(function (S) {
+          updateColors(S)
         })
       V.stepGridX = undefined
       V.stepGridY = undefined
@@ -413,7 +417,7 @@ var Charty = (function () {
         if (n === 'x')
           AX = d
         else
-          AY.push({ data: d, color: (props.colors || {})[n], name: (props.names || {})[n], type: props.type })
+          AY.push({ data: d, color: (props.colors || {})[n], fillColor: (props.fillColors || {})[n], name: (props.names || {})[n], type: props.type })
       })
 
       AYL = AY.length
@@ -432,6 +436,7 @@ var Charty = (function () {
         var S = AY[i], off = false
 
         S._color = S.color
+        S._fillColor = S.fillColor
         if (!TYPES.percentage) {
           STREE_MAX[i] = initSTree(S.data)
           buildSTree(STREE_MAX[i], S.data, Math.max)
@@ -734,22 +739,48 @@ var Charty = (function () {
       }
     }
 
+    function buildColorStyle(color) {
+      var gradient
+
+      if (color instanceof Object) {
+        if (color.type === 'linear_gradient_h')
+          gradient = ctx.createLinearGradient(0, 0, UI.main.width, 0)
+        if (color.type === 'linear_gradient_v')
+          gradient = ctx.createLinearGradient(0, 0, 0, UI.main.height)
+
+        color.colors.forEach(function (c, i, a) {
+          gradient.addColorStop(i / (a.length - 1), c)
+        })
+        return gradient
+      }
+      return color
+    }
+
     function renderLinear(type, height, vStart, hPadding, offsetY, offsetX, startIdx, endIdx, scaleX, scaleY) {
       height -= UI.grid.markerRadius + UI.grid.markerLineWidth
-      for (var s = 0, idx, x, data, color; s < AYL; s++) {
+      for (var s = 0, idx, x, data, color, fillColor, startX; s < AYL; s++) {
         data = AY[s].data
-        color = AY[s].color
+        color = buildColorStyle(AY[s].color)
+        fillColor = buildColorStyle(AY[s].fillColor)
 
-        UI.canvas.startLine((1 - V.progress) * A['alphaY' + s], color, 0, ctx.lineWidth)
+        UI.canvas.startLine((1 - V.progress) * A['alphaY' + s], color, fillColor, ctx.lineWidth)
         idx = TYPES.multi_yaxis ? s : ''
         scaleY = height / A[type + 'DY' + idx]
         for (var i = startIdx; i <= endIdx; i++) {
           x = offsetX + hPadding + (AX[i] - vStart) * scaleX
-          if (i === startIdx)
+          if (i === startIdx) {
+            startX = x
             ctx.moveTo(x, offsetY - (data[i] - A[type + 'MinY' + idx]) * scaleY)
+          }
           ctx.lineTo(x, offsetY - (data[i] - A[type + 'MinY' + idx]) * scaleY)
         }
-        ctx.stroke()
+        if (fillColor) {
+          ctx.stroke()
+          ctx.lineTo(x, offsetY)
+          ctx.lineTo(startX, offsetY)
+          ctx.fill()
+        } else
+          ctx.stroke()
       }
     }
 

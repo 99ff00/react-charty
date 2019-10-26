@@ -93,7 +93,7 @@ For a theme switching example please check the [Demo App](https://99ff00.github.
 
 ```jsx static
 const LIGHT_THEME = {
-  grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff' },
+  grid: { color: '#182D3B', alpha: 0.1, markerFillColor: '#fff', markerRadius: 0 },
   legend: { background: '#fff', color: '#000' },
   preview: { maskColor: '#E2EEF9', maskAlpha: 0.6, brushColor: '#C0D1E1', brushBorderColor: '#fff', brushBorderAlpha: 1, handleColor: '#fff' },
   xAxis: { textColor: '#8E8E93', textAlpha: 1 },
@@ -132,6 +132,7 @@ const DARK_THEME = {
 |`data`             |Object       |Contains the data points for chart series. Every key of this object is an array of data points. The `x` array is mandatory and contains the data for x-axis while other keys represent the data points for y-axis. There could be multiple series in one chart and thus several data arrays for y-axis, for example `y`, `y0`, `y1`, `yAxis` etc. The key name can be any and is used as reference for name, color etc. The key name also defines the rendering order (alphabetically).|
 |`names`            |Object       |Contains the names for data series, referenced by key. For example, `names: { y0: 'Views', y1: 'Clicks' }`.|
 |`colors`           |Object       |Contains the colors for data series, referenced by key. For example, `colors: { y0: '#4BD964', y1: '#FE3C30' }`.|
+|`fillColors`       |Object       |Contains the fill colors for data series (only `line` type is supported for now), referenced by key. A gradient fill is also supported. For example, `fillColors: { "y1": "#FE3C3011", "y0": { "type": "linear_gradient_v", "colors": ["#4BD964", "#4BD964", "#FFFFFF00"] }}`.|
 |`theme`            |Object       |Contains the color theme for chart components. If omitted, the default theme will be used.|
 |`animated`         |Boolean      |Enables/disables animations and transitions, default value is `true`.|
 |`startX`           |Number       |The starting position of preview region. If not specified, the starting position of the preview region will be at 2/3 of `x` axis.|

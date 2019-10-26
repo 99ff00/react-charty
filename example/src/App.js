@@ -52,13 +52,16 @@ const LIGHT_THEME = {
     zoomIcon: { fill: '#008f11' },
     buttons: { color: '#0d0208' },
     pie: { textColor: '#0d0208' },
-    series: {
+    colors: {
       'Joined': '#00ff41', 'Left': '#008f11', 'Views': '#00ff41', 'Shares': '#008f11', 'Clicks': '#008f11',
       'Kiwi': '#00ff41', 'Apricots': '#008f11', 'Lemons': '#005b00', 'Mango': '#7ec251', 'Oranges': '#145105',
       'Pears': '#66e82f', 'Apples': '#0acb3b',
       'Adventure': '#03c835', 'Western': '#008f11', 'Action': '#00ff41', 'Multiple Genres': '#66e82f', 'Drama': '#0acb3b',
       'Comedy': '#008f11', 'Thriller/Suspense': '#005b00', 'Concert/Performance': '#7ec251', 'Horror': '#145105',
       'Romantic Comedy': '#12842f', 'Musical': '#079d2e'
+    },
+    fillColors: {
+      'Joined': '#00ff4177', 'Left': '#00000000'
     },
     body: { backgroundColor: '#0d0208', color: '#00ff41' },
     noteColor: '#008f11',
