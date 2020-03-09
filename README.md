@@ -141,7 +141,9 @@ const DARK_THEME = {
 |`showLegend`       |Boolean      |If set to `false` the legend will not appear when moving the cursor over the chart (or tapping chart area on mobile). The default value is `true`.|
 |`showLegendTitle`  |Boolean      |If set to `false` the legend title will not appear. The default value is `true`.|
 |`legendPosition`   |String       |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the legend popup will follow the cursor position.|
+|`showMainArea`     |Boolean      |If set to `false` the main chart area won't be visible. The default value is `true`.|
 |`showPreview`      |Boolean      |If set to `false` the chart preview won't be visible. The default value is `true`.|
+|`showBrush`        |Boolean      |If set to `false` the brush controls in preview area won't be visible. The default value is `true`.|
 |`showButtons`      |Boolean      |If set to `false` the series buttons won't be visible. Also, the buttons are hidden if there's only one series of data. The default value is `true`.|
 |`showRangeText`    |Boolean      |Show/hide current range text in top right corner. The default value is `true`.|
 |`rangeTextType`    |String       |Defines the display type of current range. It could be one of the following [DDT](#display-data-types) or can be function that accepts the `x` value of range starting and ending positions.|

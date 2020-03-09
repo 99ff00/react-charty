@@ -19,6 +19,8 @@ export default class Charty extends Component {
     showLegend: PropTypes.bool,
     showLegendTitle: PropTypes.bool,
     showButtons: PropTypes.bool,
+    showMainArea: PropTypes.bool,
+    showBrush: PropTypes.bool,
     showPreview: PropTypes.bool,
     showRangeText: PropTypes.bool,
     rangeTextType: PropTypes.string,
@@ -59,7 +61,10 @@ export default class Charty extends Component {
     if (nextProps.showButtons !== this.props.showButtons)
       this.charty.setShowButtons(nextProps.showButtons)
 
-    if (nextProps.startX !== this.props.startX)
+    if (nextProps.showMainArea !== this.props.showMainArea)
+      this.charty.setShowMainArea(nextProps.showMainArea)
+
+      if (nextProps.startX !== this.props.startX)
       this.charty.setStartX(nextProps.startX)
 
     if (nextProps.endX !== this.props.endX)

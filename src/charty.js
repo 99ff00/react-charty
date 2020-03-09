@@ -55,6 +55,8 @@ var Charty = (function () {
       buttons: { color: '#fff' },
       pie: { textColor: '#fff' }
     },
+    CHART_HEIGHT = 400,
+    MAIN_AREA_HEIGHT = 354,
     PI_RAD = Math.PI / 180,
     FONT = 'BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
     WDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -234,7 +236,7 @@ var Charty = (function () {
       TOTALS, PERCENTS = [], STREE_MIN = [], STREE_MAX = [], animations = {}, A = {},
       STATE = {}, myIdx = CHARTS.length, parentSeries, currentTheme,
       UI = UI_ || {
-        chart: { topPadding: 50, hPadding: 15, height: 400 },
+        chart: { topPadding: 50, hPadding: 15, height: CHART_HEIGHT },
         pie: { segmentShift: 5 },
         preview: { height: 46, vPadding: 1, radius: 8, lineWidth: 1, handleW: 9, handleTick: 10, minBrushSize: 10, hitSlop: 10 },
         grid: { lineWidth: 1, legendShift: -10, markerRadius: 3, markerLineWidth: 4 },
@@ -385,6 +387,8 @@ var Charty = (function () {
       V.showLegend = props.showLegend !== false
       V.showButtons = props.showButtons !== false && AYL > 1
       V.showPreview = props.showPreview !== false
+      V.showMainArea = props.showMainArea !== false
+      V.showBrush = props.showBrush !== false
       V.showRangeText = props.showRangeText !== false
       V.showLegendTitle = props.showLegendTitle !== false
       V.stepX = props.stepX || 1
@@ -589,20 +593,22 @@ var Charty = (function () {
         return
 
       ctx.save()
-      UI.canvas.rect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, w, minH, UI.preview.radius, valToX(V.localStart) > UI.chart.hPadding + UI.preview.handleW / 2, valToX(V.localEnd) < UI.main.width - UI.chart.hPadding - UI.preview.handleW / 2, true)
+      UI.canvas.rect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, w, minH, UI.preview.radius, !V.showBrush || (valToX(V.localStart) > UI.chart.hPadding + UI.preview.handleW / 2), !V.showBrush || (valToX(V.localEnd) < UI.main.width - UI.chart.hPadding - UI.preview.handleW / 2), true)
       ctx.lineWidth = UI.preview.lineWidth
       ctx.globalAlpha = a
       renderSeries('global', a, w, h - 2 * UI.preview.vPadding, V.globalStart, V.globalEnd, 0, UI.chart.height - UI.preview.vPadding, UI.chart.hPadding, true)
-      ctx.fillStyle = UI.preview.maskColor
-      ctx.globalAlpha = a * UI.preview.maskAlpha
-      ctx.fillRect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, valToX(V.localStart) - UI.chart.hPadding, minH)
-      ctx.fillRect(valToX(V.localEnd), UI.preview.y + UI.preview.vPadding, UI.main.width + UI.preview.handleW - UI.chart.hPadding - valToX(V.localEnd), minH)
+      if (V.showBrush) {
+        ctx.fillStyle = UI.preview.maskColor
+        ctx.globalAlpha = a * UI.preview.maskAlpha
+        ctx.fillRect(UI.chart.hPadding, UI.preview.y + UI.preview.vPadding, valToX(V.localStart) - UI.chart.hPadding, minH)
+        ctx.fillRect(valToX(V.localEnd), UI.preview.y + UI.preview.vPadding, UI.main.width + UI.preview.handleW - UI.chart.hPadding - valToX(V.localEnd), minH)
+      }
       ctx.restore()
-      renderBrush(a)
+      if (V.showBrush) renderBrush(a)
     }
 
     function renderAxis() {
-      if (TYPES.pie) return
+      if (TYPES.pie || !V.showMainArea) return
 
       var localD, localMin, localMax = 0, minLocalD, lowerMin,
         p = Math.min(1, V.progress)
@@ -1073,14 +1079,13 @@ var Charty = (function () {
     }
 
     function renderMain() {
+      if (!V.showMainArea) return
       ctx.lineWidth = UI.main.lineWidth
       renderSeries('local', TYPES.percentage ? 1 : 1 - V.progress, UI.preview.width, UI.main.height - 1.5 * UI.main.vPadding, V.localStart, V.localEnd, UI.chart.hPadding, UI.main.height, false)
       renderGrid()
     }
 
     function measureUI() {
-      V.needMeasure = false
-
       var ww = window.innerWidth,
         wh = window.innerHeight,
         pageYOffset = window.pageYOffset
@@ -1090,7 +1095,9 @@ var Charty = (function () {
         V.pageYOffset = pageYOffset
       }
 
-      if (V.prevW !== ww || V.prevH !== wh) {
+      UI.chart.height = V.showMainArea ? CHART_HEIGHT : CHART_HEIGHT - MAIN_AREA_HEIGHT
+
+      if (V.needMeasure || V.prevW !== ww || V.prevH !== wh) {
         V.prevW = ww
         V.prevH = wh
         UI.box.measure()
@@ -1107,6 +1114,7 @@ var Charty = (function () {
         ctx.scale(DPR, DPR)
         repaint()
       }
+      V.needMeasure = false
     }
 
     function renderGrid() {
@@ -1822,6 +1830,19 @@ var Charty = (function () {
       updateTheme()
     }
 
+    this.setShowMainArea = function (on) {
+      V.showMainArea = on
+      resize()
+      measureUI()
+      repaint()
+    }
+
+    this.setShowBrush = function (on) {
+      V.showBrush = on
+      repaint()
+      !on && resetCursor()
+    }
+
     this.setStartX = function (x) {
       V.localStart = applyRange(x, V.globalStart, V.globalEnd)
     }
@@ -1963,6 +1984,8 @@ var Charty = (function () {
         if (!IS_MOBILE || STATE.draggingArea >= AREA.PREVIEW)
           stop(e)
 
+        if (!V.showBrush) return
+
         updateCursor(area)
 
         var width = V.localEnd - V.localStart,
@@ -2022,6 +2045,7 @@ var Charty = (function () {
       })
 
       UI.canvas.on('touchstart mousedown', function (e, x, y, area) {
+        if (!V.showBrush) return
         STATE.draggingArea = area
         if (area > AREA.PREVIEW) {
           V.deltaDragX = x - valToX(V.localStart) - UI.preview.handleW / 2
@@ -2046,6 +2070,7 @@ var Charty = (function () {
       })
 
       UI.canvas.on('touchend touchcancel mouseup', function (e, x, y, area) {
+        if (!V.showBrush) return
         if (!IS_MOBILE && !isNaN(V.vLineX) && !V.zoomedChart)
           zoomIn(V.vLineX)
 
