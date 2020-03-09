@@ -425,6 +425,15 @@ var Charty = (function () {
       X.min = AX[0]
       X.max = AX[AXL - 1]
       X.d = X.max - X.min
+
+      if (V.globalStart !== X.min || V.globalEnd !== X.max) {
+        V.localStart = props.startX || 2 / 3 * X.d + X.min
+        V.localEnd = props.endX || X.max
+        V.globalStart = X.min
+        V.globalEnd = X.max
+        V.prevStepGridX = undefined
+      }
+
       V.localMM = undefined
       V.globalMM = undefined
 
@@ -450,13 +459,6 @@ var Charty = (function () {
         S.off = off
         A['alphaY' + i] = off ? 0 : 1
         A['on' + i] = off ? 0 : 1
-      }
-
-      if (!restart) {
-        V.localStart = props.startX || 2 / 3 * X.d + X.min
-        V.localEnd = props.endX || X.max
-        V.globalStart = X.min
-        V.globalEnd = X.max
       }
 
       V.minBrushSize = X.d * UI.preview.minBrushSize / 100
@@ -609,8 +611,7 @@ var Charty = (function () {
       if (TYPES.percentage) {
         localMin = 0
         localMax = 100
-      }
-      else if (TYPES.stacked || TYPES.bar || TYPES.percentage) {
+      } else if (TYPES.stacked || TYPES.bar || TYPES.percentage) {
         for (var i = 0, val; i < AYL; i++) {
           val = AY[i].max * A['on' + i]
           localMax = TYPES.stacked ? localMax + val : Math.max(localMax, val)
@@ -682,8 +683,15 @@ var Charty = (function () {
     }
 
     function renderXText(prevStep, stepGridX, start, end, scaleX, y, p) {
-      var a = A['stepGridXA' + stepGridX] * UI.xAxis.textAlpha * p
+      var a = A['stepGridXA' + stepGridX]
+      if (a === undefined) {
+        a = 1
+      }
+
+      a = a * UI.xAxis.textAlpha * p
+
       if (a === 0) return
+
       start -= start % stepGridX
       ctx.fillStyle = UI.xAxis.textColor
       ctx.globalAlpha = a
@@ -1247,7 +1255,7 @@ var Charty = (function () {
           for (var i = 0; i < AYL; i++) {
             var s = AY[i]
             prevMM = s[name + 'MM']
-            if (s.min !== prevMM.min || s.d !== prevMM.d) {
+            if (prevMM && (s.min !== prevMM.min || s.d !== prevMM.d)) {
               animate(name + 'DY' + i, prevMM.d, s.d, ANIMATE_DURATION)
               animate(name + 'MinY' + i, prevMM.min, s.min, ANIMATE_DURATION)
             }
