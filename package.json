@@ -1,6 +1,6 @@
 {
   "name": "react-charty",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "To visualize your precious data",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
