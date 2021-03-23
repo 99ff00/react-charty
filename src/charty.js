@@ -1345,11 +1345,11 @@ var Charty = (function () {
       update ? update(from) : A[name] = from
       animations[name] = {
         ease: ease || EASE.outQuad,
-        from,
-        to,
-        duration,
-        update,
-        cb
+        from: from,
+        to: to,
+        duration: duration,
+        update: update,
+        cb: cb
       }
     }
 
