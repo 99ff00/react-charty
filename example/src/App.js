@@ -53,15 +53,32 @@ const LIGHT_THEME = {
     buttons: { color: '#0d0208' },
     pie: { textColor: '#0d0208' },
     colors: {
-      'Joined': '#00ff41', 'Left': '#008f11', 'Views': '#00ff41', 'Shares': '#008f11', 'Clicks': '#008f11',
-      'Kiwi': '#00ff41', 'Apricots': '#008f11', 'Lemons': '#005b00', 'Mango': '#7ec251', 'Oranges': '#145105',
-      'Pears': '#66e82f', 'Apples': '#0acb3b',
-      'Adventure': '#03c835', 'Western': '#008f11', 'Action': '#00ff41', 'Multiple Genres': '#66e82f', 'Drama': '#0acb3b',
-      'Comedy': '#008f11', 'Thriller/Suspense': '#005b00', 'Concert/Performance': '#7ec251', 'Horror': '#145105',
-      'Romantic Comedy': '#12842f', 'Musical': '#079d2e'
+      Joined: '#00ff41',
+      Left: '#008f11',
+      Views: '#00ff41',
+      Shares: '#008f11',
+      Clicks: '#008f11',
+      Kiwi: '#00ff41',
+      Apricots: '#008f11',
+      Lemons: '#005b00',
+      Mango: '#7ec251',
+      Oranges: '#145105',
+      Pears: '#66e82f',
+      Apples: '#0acb3b',
+      Adventure: '#03c835',
+      Western: '#008f11',
+      Action: '#00ff41',
+      'Multiple Genres': '#66e82f',
+      Drama: '#0acb3b',
+      Comedy: '#008f11',
+      'Thriller/Suspense': '#005b00',
+      'Concert/Performance': '#7ec251',
+      Horror: '#145105',
+      'Romantic Comedy': '#12842f',
+      Musical: '#079d2e'
     },
     fillColors: {
-      'Joined': '#00ff4177', 'Left': '#00000000'
+      Joined: '#00ff4177', Left: '#00000000'
     },
     body: { backgroundColor: '#0d0208', color: '#00ff41' },
     noteColor: '#008f11',
@@ -117,7 +134,7 @@ const LIGHT_THEME = {
   }
 
 export default class App extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -127,10 +144,10 @@ export default class App extends Component {
     }
   }
 
-  async componentDidMount() {
-    const dataFiles = [1,2,3,4,5].map((id) => fetch(`data/${id}/overview.json`)),
+  async componentDidMount () {
+    const dataFiles = [1, 2, 3, 4, 5].map((id) => fetch(`data/${id}/overview.json`)),
       results = await Promise.all(dataFiles),
-      data = await Promise.all(results.map((r) => r.json()));
+      data = await Promise.all(results.map((r) => r.json()))
 
     this.setState({
       isLoaded: true,
@@ -159,8 +176,9 @@ export default class App extends Component {
     var themeIdx = this.state.themeIdx
     themeIdx++
 
-    if (themeIdx === THEMES.length)
+    if (themeIdx === THEMES.length) {
       themeIdx = 0
+    }
 
     this.setState({ themeIdx })
     this.setTheme(themeIdx)
@@ -182,8 +200,9 @@ export default class App extends Component {
   }
 
   render () {
-    if (!this.state.isLoaded)
-      return null;
+    if (!this.state.isLoaded) {
+      return null
+    }
 
     const width = IS_MOBILE ? '100%' : '50%',
       theme = THEMES[this.state.themeIdx],
@@ -192,17 +211,17 @@ export default class App extends Component {
 
     return (
       <React.Fragment>
-        <h3 className="note" onClick={this.switchTheme}>Switch theme</h3>
-        <h4 className="note">(click on the {IS_MOBILE ? 'legend' : 'chart'} to zoom in)</h4>
-        <div className="container">
-          <Charty title="Followers" theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
-          <Charty title="Fruits" theme={theme} style={style} {...data[4]} />
-          <Charty title="Interactions" theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
-          <Charty title="Messages" theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
-          <Charty title="Views" theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
-          <Charty title="Box Office Ticket Sales" theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
+        <h3 className='note' onClick={this.switchTheme}>Switch theme</h3>
+        <h4 className='note'>(click on the {IS_MOBILE ? 'legend' : 'chart'} to zoom in)</h4>
+        <div className='container'>
+          <Charty title='Followers' theme={theme} style={style} {...data[0]} onZoomIn={(x) => this.onZoomIn(1, x)} />
+          <Charty title='Fruits' theme={theme} style={style} {...data[4]} />
+          <Charty title='Interactions' theme={theme} style={style} {...data[1]} onZoomIn={(x) => this.onZoomIn(2, x)} />
+          <Charty title='Messages' theme={theme} style={style} {...data[2]} onZoomIn={(x) => this.onZoomIn(3, x)} />
+          <Charty title='Views' theme={theme} style={style} {...data[3]} onZoomIn={(x) => this.onZoomIn(4, x)} />
+          <Charty title='Box Office Ticket Sales' theme={theme} style={style} {...BOX_OFFICE_DATA} stepX={1} startX={2017} endX={2018} />
         </div>
-        <h3 className="bottom note" onClick={this.switchTheme}>Switch theme</h3>
+        <h3 className='bottom note' onClick={this.switchTheme}>Switch theme</h3>
       </React.Fragment>
     )
   }

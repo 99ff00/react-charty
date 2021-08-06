@@ -264,6 +264,8 @@ var Charty = (function () {
       function updateColors(S) {
         S.color = theme.colors && theme.colors[S.name] ? theme.colors[S.name] : S._color
         S.fillColor = theme.fillColors && theme.fillColors[S.name] ? theme.fillColors[S.name] : S._fillColor
+        S.hideFromLegend = theme.hideFromLegend && theme.hideFromLegend[S.name] ? theme.hideFromLegend[S.name] : S._hideFromLegend
+        S.buttonTextColor = theme.buttonTextColor && theme.buttonTextColor[S.name] ? theme.buttonTextColor[S.name] : S._buttonTextColor;
       }
       AY.map(function (S, i, series) {
         updateColors(S)
@@ -421,7 +423,15 @@ var Charty = (function () {
         if (n === 'x')
           AX = d
         else
-          AY.push({ data: d, color: (props.colors || {})[n], fillColor: (props.fillColors || {})[n], name: (props.names || {})[n], type: props.type })
+          AY.push({ data: d,
+            color: (props.colors || {})[n],
+            buttonTextColor: (props.buttonTextColor || {})[n],
+            hideFromLegend: (props.hideFromLegend || {})[n],
+            disabled: (props.off || {})[n],
+            fillColor: (props.fillColors || {})[n],
+            name: (props.names || {})[n],
+            type: props.type
+          })
       })
 
       AYL = AY.length
@@ -450,6 +460,9 @@ var Charty = (function () {
 
         S._color = S.color
         S._fillColor = S.fillColor
+        S._buttonTextColor = S.buttonTextColor
+        S._hideFromLegend = S.hideFromLegend
+
         if (!TYPES.percentage) {
           STREE_MAX[i] = initSTree(S.data)
           buildSTree(STREE_MAX[i], S.data, Math.max)
@@ -460,9 +473,9 @@ var Charty = (function () {
         if (parentSeries && parentSeries[i] && parentSeries[i].name === S.name)
           off = parentSeries[i].off
 
-        S.off = off
-        A['alphaY' + i] = off ? 0 : 1
-        A['on' + i] = off ? 0 : 1
+        S.off = S.disabled !== undefined ? S.disabled : off
+        A['alphaY' + i] = S.off ? 0 : 1
+        A['on' + i] = S.off ? 0 : 1
       }
 
       V.minBrushSize = X.d * UI.preview.minBrushSize / 100
@@ -1345,11 +1358,11 @@ var Charty = (function () {
       update ? update(from) : A[name] = from
       animations[name] = {
         ease: ease || EASE.outQuad,
-        from,
-        to,
-        duration,
-        update,
-        cb
+        from: from,
+        to: to,
+        duration: duration,
+        update: update,
+        cb: cb
       }
     }
 
@@ -1381,12 +1394,12 @@ var Charty = (function () {
         return
 
       var to = off ? 0 : 1,
-        buttonColor = (currentTheme.buttons || {}).color || '#fff',
-        series = series_ || AY
+        series = series_ || AY,
+        buttonColor = off ? (series[i].buttonTextColor || series[i].color) : series[i].buttonTextColor || (currentTheme.buttons || {}).color || '#fff'
 
       UI['checkbox' + i].attr('class', (typeof styles !== 'undefined') ? styles['checkbox'] : ('checkbox ' + (off ? 'off' : 'on'))).stylo({ backgroundColor: off ? 'transparent' : series[i].color, borderColor: series[i].color })
       UI['chk' + i].stylo({ transform: 'scale(' + to + ')', opacity: to, fill: buttonColor }, true)
-      UI['name' + i].stylo({ transform: 'translate3d(' + ((to - 1) * 8) + 'px, 0, 0)', color: off ? series[i].color : buttonColor })
+      UI['name' + i].stylo({ transform: 'translate3d(' + ((to - 1) * 8) + 'px, 0, 0)', color: buttonColor })
     }
 
     function toggleCheckbox(i, off) {
@@ -1446,7 +1459,7 @@ var Charty = (function () {
 
         for (var s = 0, pp = 0; s < AYL; s++) {
           var S = AY[s], v = pieMode ? S.val : S.data[idx]
-          UI['label' + s].stylo({ display: S.off || (pieMode && s !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
+          UI['label' + s].stylo({ display: S.hideFromLegend || S.off || (pieMode && s !== V.segment) ? 'none' : 'flex', paddingTop: pieMode ? 0 : 5 })
           if (S.off) continue
           sum += v
           if (TYPES.multi_yaxis)

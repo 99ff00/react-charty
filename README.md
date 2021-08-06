@@ -133,12 +133,15 @@ const DARK_THEME = {
 |`names`            |Object       |Contains the names for data series, referenced by key. For example, `names: { y0: 'Views', y1: 'Clicks' }`.|
 |`colors`           |Object       |Contains the colors for data series, referenced by key. For example, `colors: { y0: '#4BD964', y1: '#FE3C30' }`.|
 |`fillColors`       |Object       |Contains the fill colors for data series (only `line` type is supported for now), referenced by key. A gradient fill is also supported. For example, `fillColors: { "y1": "#FE3C3011", "y0": { "type": "linear_gradient_v", "colors": ["#4BD964", "#4BD964", "#FFFFFF00"] }}`.|
+|`buttonTextColor`  |Object       |Contains the colors for button caption, referenced by key.|
 |`theme`            |Object       |Contains the color theme for chart components. If omitted, the default theme will be used.|
 |`animated`         |Boolean      |Enables/disables animations and transitions, default value is `true`.|
 |`startX`           |Number       |The starting position of preview region. If not specified, the starting position of the preview region will be at 2/3 of `x` axis.|
 |`endX`             |Number       |The ending position of preview region. If not specified, the ending position of the preview region will be at the end of `x` axis.|
 |`stepX`            |Number       |The value to increase/decrease current `x` axis position when dragging or moving the chart preview region. For example, if you have X axis of type `timestamp` and you want to navigate by one day, you can set the `stepX` value to `86400000`. The default value is `1`.|
 |`showLegend`       |Boolean      |If set to `false` the legend will not appear when moving the cursor over the chart (or tapping chart area on mobile). The default value is `true`.|
+|`hideFromLegend`   |Object       |Allows to hide the series from the legend, referenced by key. For example, `hideFromLegend: { y0: true, y1: true }`|
+|`disabled`         |Object       |Switches off series, referenced by key. For example, `disabled: { y0: true }`|
 |`showLegendTitle`  |Boolean      |If set to `false` the legend title will not appear. The default value is `true`.|
 |`legendPosition`   |String       |Defines the position of legend popup and can be one of the following values: `top`, `bottom`, `cursor`. The default value is `cursor`, which means the legend popup will follow the cursor position.|
 |`showMainArea`     |Boolean      |If set to `false` the main chart area won't be visible. The default value is `true`.|
