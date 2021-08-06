@@ -1,15 +1,20 @@
 {
   "files": {
-    "main.css": "/react-charty/static/css/main.23b1d777.chunk.css",
-    "main.js": "/react-charty/static/js/main.28d0baad.chunk.js",
-    "main.js.map": "/react-charty/static/js/main.28d0baad.chunk.js.map",
-    "runtime~main.js": "/react-charty/static/js/runtime~main.33b48a15.js",
-    "runtime~main.js.map": "/react-charty/static/js/runtime~main.33b48a15.js.map",
-    "static/js/2.c089152a.chunk.js": "/react-charty/static/js/2.c089152a.chunk.js",
-    "static/js/2.c089152a.chunk.js.map": "/react-charty/static/js/2.c089152a.chunk.js.map",
+    "main.css": "/react-charty/static/css/main.5a7325c2.chunk.css",
+    "main.js": "/react-charty/static/js/main.bd01b395.chunk.js",
+    "main.js.map": "/react-charty/static/js/main.bd01b395.chunk.js.map",
+    "runtime-main.js": "/react-charty/static/js/runtime-main.b51019ad.js",
+    "runtime-main.js.map": "/react-charty/static/js/runtime-main.b51019ad.js.map",
+    "static/js/2.f98faf8a.chunk.js": "/react-charty/static/js/2.f98faf8a.chunk.js",
+    "static/js/2.f98faf8a.chunk.js.map": "/react-charty/static/js/2.f98faf8a.chunk.js.map",
     "index.html": "/react-charty/index.html",
-    "precache-manifest.0cefc31e347a1145984cf739fef1899f.js": "/react-charty/precache-manifest.0cefc31e347a1145984cf739fef1899f.js",
-    "service-worker.js": "/react-charty/service-worker.js",
-    "static/css/main.23b1d777.chunk.css.map": "/react-charty/static/css/main.23b1d777.chunk.css.map"
-  }
+    "static/css/main.5a7325c2.chunk.css.map": "/react-charty/static/css/main.5a7325c2.chunk.css.map",
+    "static/js/2.f98faf8a.chunk.js.LICENSE.txt": "/react-charty/static/js/2.f98faf8a.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.b51019ad.js",
+    "static/js/2.f98faf8a.chunk.js",
+    "static/css/main.5a7325c2.chunk.css",
+    "static/js/main.bd01b395.chunk.js"
+  ]
 }
