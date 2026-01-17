@@ -552,7 +552,7 @@ const Charty = (function () {
 
       if (TYPES.bar || TYPES.area || TYPES.pie) {
         ctx.fillStyle = UI.preview.brushBorderColor || "";
-        ctx.globalAlpha = UI.preview.brushBorderAlpha || 1;
+        ctx.globalAlpha = UI.preview.brushBorderAlpha ?? 1;
         canvasEl?.rect?.(
           start - hw - 1,
           (UI.preview.y || 0) - 1,
@@ -653,7 +653,7 @@ const Charty = (function () {
       );
       if (V.showBrush) {
         ctx.fillStyle = UI.preview.maskColor || "";
-        ctx.globalAlpha = a * (UI.preview.maskAlpha || 0.6);
+        ctx.globalAlpha = a * (UI.preview.maskAlpha ?? 0.6);
         ctx.fillRect(
           UI.chart.hPadding,
           (UI.preview.y || 0) + UI.preview.vPadding,
@@ -731,7 +731,6 @@ const Charty = (function () {
       let stepGridY = Math.round(localD / UI.yAxis.textCount) || 1;
       const d = 5 * Math.pow(10, stepGridY.toString().length - 2) || 1;
 
-      stepGridX = Math.max(1, Math.round(stepGridX || 1));
       stepGridY = Math.max(1, Math.round(stepGridY / d) * d);
 
       if (V.stepGridX !== stepGridX) {
@@ -797,7 +796,7 @@ const Charty = (function () {
       );
 
       if (TYPES.percentage) {
-        ctx.globalAlpha = (UI.xAxis.textAlpha || 1) * (1 - p);
+        ctx.globalAlpha = (UI.xAxis.textAlpha ?? 1) * (1 - p);
         ctx.fillStyle = UI.yAxis.textColor || "";
         ctx.fillText("100", UI.chart.hPadding, 12);
       }
@@ -817,7 +816,7 @@ const Charty = (function () {
       let a = A["stepGridXA" + stepGridX];
       if (a === undefined) a = 1;
 
-      a = a * (UI.xAxis.textAlpha || 1) * p;
+      a = a * (UI.xAxis.textAlpha ?? 1) * p;
 
       if (a === 0) return;
 
@@ -869,8 +868,8 @@ const Charty = (function () {
       let yPos: number;
       let val: string;
       let c = 0;
-      const a0 = TYPES.multi_yaxis ? A["alphaY0"] || 1 : 1;
-      const a1 = TYPES.multi_yaxis ? A["alphaY1"] || 1 : 1;
+      const a0 = TYPES.multi_yaxis ? A["alphaY0"] ?? 1 : 1;
+      const a1 = TYPES.multi_yaxis ? A["alphaY1"] ?? 1 : 1;
       const a = A["stepGridYA" + stepGridY] || 0;
 
       while (y_ < localMax) {
@@ -883,7 +882,7 @@ const Charty = (function () {
         }
         val = "" + Math.floor(c === 0 ? localMin : y__);
 
-        ctx.globalAlpha = a * (p || 1) * a0 * (UI.yAxis.textAlpha || 1);
+        ctx.globalAlpha = a * (p ?? 1) * a0 * (UI.yAxis.textAlpha ?? 1);
         ctx.fillStyle = TYPES.multi_yaxis
           ? AY[0].color || ""
           : UI.yAxis.textColor || "";
@@ -901,7 +900,7 @@ const Charty = (function () {
             ),
           );
           if (c > 0 && numVal > 50) numVal = Math.ceil(numVal / 10) * 10;
-          ctx.globalAlpha = a * (p || 1) * a1;
+          ctx.globalAlpha = a * (p ?? 1) * a1;
           const u2 =
             props.yAxisType instanceof Function
               ? props.yAxisType(numVal)
@@ -925,7 +924,7 @@ const Charty = (function () {
           yPos,
           UI.grid.lineWidth,
           UI.grid.color || "",
-          a * (UI.grid.alpha || 0.1) * (p || 1),
+          a * (UI.grid.alpha ?? 0.1) * (p ?? 1),
         );
         if (!prevStep) V.yPos[c] = yPos;
         if (c === 0 && stepGridY > 10) {
@@ -1047,7 +1046,7 @@ const Charty = (function () {
         max = TYPES.stacked ? max + val : Math.max(max, val);
       }
 
-      if (V.showLegend && (V.vLineX || 0) >= 0) {
+      if (V.showLegend && V.vLineX !== undefined && V.vLineX >= 0) {
         const x =
           (V.localStart || 0) +
           (((V.highlightedX || 0) - UI.chart.hPadding) /
@@ -1171,6 +1170,7 @@ const Charty = (function () {
 
           canvasEl?.startLine?.(alpha, undefined, S.color, ctx.lineWidth);
 
+          let startX = 0;
           for (let i = startIdx; i <= endIdx; i++) {
             const stack = STACK[i] || 0;
             const val = ((100 * S.data[i]) / TOTALS[i]) * alpha;
@@ -1179,7 +1179,6 @@ const Charty = (function () {
             const dy = isPreview
               ? 0
               : Math.abs(x) / Math.tan((90 * _p + progress * sector) * PI_RAD);
-            let startX = 0;
             if (i === startIdx) {
               startX = x;
               ctx.moveTo(x, _p * y + dy);
