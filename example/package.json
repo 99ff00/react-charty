@@ -5,30 +5,20 @@
   "license": "MIT",
   "dependencies": {
     "prop-types": "^15.7.2",
-    "react": "^17.0.2",
-    "react-charty": "file:..",
-    "react-dom": "^17.0.2",
-    "react-scripts": "^4.0.3",
-    "react-app-polyfill": "^2.0.0"
+    "react": "^19.0.0",
+    "react-charty": "file:../dist",
+    "react-dom": "^19.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "vite build && gh-pages -d dist"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all",
-      "ie 11"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "ie 11"
-    ]
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "gh-pages": "^6.1.1",
+    "vite": "^5.4.0"
   }
 }

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "outDir": ".tmp",
+    "rootDir": "src",
+    "module": "ESNext",
+    "target": "ES5",
+    "sourceMap": false
+  },
+  "include": [
+    "src/charty.ts",
+    "src/types/**/*",
+    "src/constants/**/*",
+    "src/utils/**/*"
+  ]
+}
