@@ -2,6 +2,10 @@
 
 # react-charty [![npm version](https://badge.fury.io/js/react-charty.svg)](https://badge.fury.io/js/react-charty) [![npm](https://img.shields.io/npm/dt/react-charty.svg)](https://www.npmjs.org/package/react-charty) ![MIT](https://img.shields.io/dub/l/vibe-d.svg)
 
+> [!WARNING]
+> **Deprecated:** `react-charty` is no longer maintained. For the new charting
+> library, see [Sixtyfold Charts](https://github.com/60fold/charts-js).
+
 This component was born from the [Telegram](https://telegram.org/) programming contest where I took one of the prize places. A big thanks to the Telegram team and all contestants.
 Read further to find usage instructions and how to customize this component.
 
